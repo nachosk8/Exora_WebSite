@@ -1,7 +1,7 @@
 <%@ Language="VBScript" %>
 <%
 ' --- valores dinámicos de ejemplo ---
-docsPorFirmar = 2
+docsPorFirmar =2
 faltasPorAprobar = 0
 diasDeVacaciones = 14
 diasAlFeriado = 30
@@ -16,16 +16,27 @@ CEO = "no"  'simulo ser empleado
     <link rel="stylesheet" href="../css/estilo_principal.css">
 </head>
 <body>
+    <header class="barra-superior">
+        <div class="usuario">
+             JUAN IGNACIO SKREKA IVANESEVIC
+
+        </div><img src= "../imagenes/ndea.png" class="foto-de-perfil"/>
+        <div class="espacio"></div>
+        <div class="deslogin"><a class="link-deslog" href="http://localhost/Exora_WebSite/ASP/form.asp">Salir</a></div>
+
+    </header>
+
+
     <div class="pantalla">
         <!-- Menú lateral -->
         <aside class="menu-lateral">
             <img src= "../imagenes/logo.png" class="img-logo"/>
             <nav>
                 <ul>
-                    <br><li><a href="#">📄 DOCUMENTOS</a></li><br>
+                    <br><li><a href="http://localhost/Exora_WebSite/ASP/verDocumentos.asp">📄 DOCUMENTOS</a></li><br>
                     
                     <% IF CEO <> "si" then%>
-                    <li><a href="#">📅 CALENDARIO</a></li><br>
+                    <li><a href="http://localhost/Exora_WebSite/ASP">📅 CALENDARIO</a></li><br>
                     <li><a href="#">🏖️ VACACIONES</a></li><br>
                     <% else %>
                     <div class="agregar-anuncio">
@@ -40,22 +51,24 @@ CEO = "no"  'simulo ser empleado
         <main class="contenido-principal">
             <!-- Cuadros de estadísticas -->
             <div class="cuadros-estadisticas">
-                <div class="tarjeta">
-                    <div class="lado-izquierdo">
-                        <div class="icono-tarjeta">📄</div>
-                        <div class="contenido-tarjeta">
-                            <div class="titulo-tarjeta">DOCUMENTOS</div>
-                            <div class="subtitulo-tarjeta">Por firmar</div>
+                <a class="acceso-a-otra-pag" href="http://localhost/Exora_WebSite/ASP/verDocumentos.asp">
+                    <div class="tarjeta" id ="ver_documentos">
+                        <div class="lado-izquierdo">
+                            <div class="icono-tarjeta">📄</div>
+                            <div class="contenido-tarjeta">
+                                <div class="titulo-tarjeta">Documentos</div>
+                                <div class="subtitulo-tarjeta">Por firmar</div>
+                            </div>
                         </div>
+                        <div class="numero-tarjeta"><%= docsPorFirmar %></div>
                     </div>
-                    <div class="numero-tarjeta"><%= docsPorFirmar %></div>
-                </div>
+                </a>
                 <% if CEO  <> "si" then %>
                 <div class="tarjeta">
                     <div class="lado-izquierdo">
                         <div class="icono-tarjeta">📥</div>
                         <div class="contenido-tarjeta">
-                            <div class="titulo-tarjeta">FALTAS</div>
+                            <div class="titulo-tarjeta">Faltas</div>
                             <div class="subtitulo-tarjeta">Por aprobar</div>
                         </div>
                     </div>
@@ -66,18 +79,18 @@ CEO = "no"  'simulo ser empleado
                     <div class="lado-izquierdo">
                         <div class="icono-tarjeta">🏖️</div>
                         <div class="contenido-tarjeta">
-                            <div class="titulo-tarjeta">VACACIONES</div>
+                            <div class="titulo-tarjeta">Vacaciones</div>
                             <div class="subtitulo-tarjeta">Días disponibles</div>
                         </div>
                     </div>
                     <div class="numero-tarjeta"><%= diasDeVacaciones %></div>
                 </div>
 
-                <div class="tarjeta">
+<!--                <div class="tarjeta">
                     <div class="lado-izquierdo">
                         <div class="icono-tarjeta">🌴</div>
                         <div class="contenido-tarjeta">
-                            <div class="titulo-tarjeta">FERIADO</div>
+                            <div class="titulo-tarjeta">Feriado</div>
                             <div class="subtitulo-tarjeta">Que viene</div>
                         </div>
                     </div>
@@ -85,6 +98,7 @@ CEO = "no"  'simulo ser empleado
                 </div>
                  <% end if %>
             </div>
+            -->
 
                
 

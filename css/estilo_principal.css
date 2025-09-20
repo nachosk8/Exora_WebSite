@@ -8,6 +8,7 @@
 *{box-sizing:border-box}
 body{
   margin:0;
+  padding-top: 50px;
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   background:var(--bg);
   color:#222;
@@ -18,14 +19,18 @@ body{
 .pantalla{display:flex; min-height:100vh}
 
 /* Sidebar */
-.menu-lateral{
+.menu-lateral {
   width:220px;
   background:var(--color--barra--izq);
   color:white;
   position:fixed;
-  top:0; left:0; bottom:0;
+  top:50px;  /* 🔹 debajo de la barra */
+  left:0;
+  bottom:0;
   padding:20px 12px;
+  z-index: 500;  /* 🔹 más chico que la barra */
 }
+
 
 .menu-lateral nav ul{list-style:none;padding:0;margin:0}
 .menu-lateral nav li{margin:10px 0}
@@ -52,13 +57,15 @@ body{
 }
 
 /* Main content area */
-.contenido-principal{
+.contenido-principal {
   margin-left:240px;
   padding:22px;
   flex:1;
   overflow-y:auto;
   min-height:100vh;
+  margin-top:50px; /* 🔹 deja espacio para la barra */
 }
+
 
 /* --- CUADROS DE ESTADÍSTICAS --- */
 .cuadros-estadisticas{
@@ -66,6 +73,10 @@ body{
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap:16px;
   margin-bottom:20px;
+}
+
+.cuadros-estadisticas .acceso-a-otra-pag{
+  text-decoration: none;
 }
 
 /* cada tarjeta */
@@ -106,6 +117,7 @@ body{
   color:var(--muted);
   margin-top:4px;
   letter-spacing:0.4px;
+  
 }
 
 /* valor a la derecha */
@@ -158,6 +170,14 @@ body{
   border:5px solid rgb(0, 170, 255);
 }
 
+.foto-de-perfil{
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+  border: 1px solid rgb(0, 170, 255);
+
+}
+
 /* Efecto hover para las tarjetas */
 .tarjeta {
   transition: all 0.3s ease; /* suaviza el cambio */
@@ -186,4 +206,49 @@ body{
 /* Cambia el color cuando pasas el mouse */
 .agregar-anuncio #btnAgregar:hover {
     background-color: #0056b3; /* color al hacer hover */
+}
+
+.barra-superior {
+    width: 100%;
+    height: 50px;
+    background-color: #ffffff; /* azul, como tu menú lateral */
+    color: rgb(0, 0, 0);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000; /* queda por encima */
+}
+
+/* Contenedor usuario ocupa 25% y lo manda a la derecha */
+.barra-superior .usuario {
+    width: 25%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    border-bottom: 2px solid rgb(0, 170, 255);
+    border-top: 2px solid rgb(0, 170, 255);
+}
+
+.barra-superior .deslogin {
+    width: 5%;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    font-size: 16px;
+    background-color: rgb(68, 0, 255);
+    border-radius: 5px;
+  
+}
+.barra-superior .link-deslog {
+  color: rgb(255, 255, 255);
+  text-decoration: none;
+}
+
+.barra-superior .espacio {
+  width: 30px;
 }
