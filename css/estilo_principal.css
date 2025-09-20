@@ -1,0 +1,189 @@
+:root{
+  --color--barra--izq: #003cff;
+  --muted: #6b6b6b;
+  --bg: #ececec;
+}
+
+/* Reset / base */
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background:var(--bg);
+  color:#222;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Layout */
+.pantalla{display:flex; min-height:100vh}
+
+/* Sidebar */
+.menu-lateral{
+  width:220px;
+  background:var(--color--barra--izq);
+  color:white;
+  position:fixed;
+  top:0; left:0; bottom:0;
+  padding:20px 12px;
+}
+
+.menu-lateral nav ul{list-style:none;padding:0;margin:0}
+.menu-lateral nav li{margin:10px 0}
+.menu-lateral nav a{
+  color:white;
+  border-color: white;
+  background-color: #00124e;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:15px;
+  height: 60px;
+  padding:10px 12px;
+  border-radius:8px;
+  border: 2px solid white;
+  transition: all 0.25s ease-in-out;
+}
+.menu-lateral nav a:hover,
+.menu-lateral nav a:focus{
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transform: translateX(12px);
+}
+
+/* Main content area */
+.contenido-principal{
+  margin-left:240px;
+  padding:22px;
+  flex:1;
+  overflow-y:auto;
+  min-height:100vh;
+}
+
+/* --- CUADROS DE ESTADÍSTICAS --- */
+.cuadros-estadisticas{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap:16px;
+  margin-bottom:20px;
+}
+
+/* cada tarjeta */
+.tarjeta{
+  background:#fff;
+  border-radius:10px;
+  padding:14px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border:1px solid rgba(0,0,0,0.04);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+/* izquierda (icono + textos) */
+.lado-izquierdo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.icono-tarjeta{
+  width:48px;height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  background:rgba(45,122,54,0.06);
+  font-size:22px;
+}
+
+/* textos */
+.contenido-tarjeta .titulo-tarjeta{
+  font-weight:600;
+  font-size:15px;
+}
+.contenido-tarjeta .subtitulo-tarjeta{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:4px;
+  letter-spacing:0.4px;
+}
+
+/* valor a la derecha */
+.numero-tarjeta{
+  font-size:28px;
+  font-weight:700;
+  color:var(--color--barra--izq);
+  min-width:56px;
+  text-align:right;
+}
+.numero-tarjeta .chiquito{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:600;
+  margin-left:6px;
+}
+
+/* --- POSTS (feed) --- */
+.noticia{
+  background:#fff;
+  border-radius:8px;
+  padding:16px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  margin-bottom:18px;
+  border:1px solid rgba(0,0,0,0.04);
+}
+
+.cabecera-noticia{
+  display:flex;
+  justify-content:space-between;
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:10px;
+}
+.cuerpo-noticia h3{
+  margin:0 0 8px 0;
+  color:var(--color--barra--izq);
+}
+.cuerpo-noticia p{
+  margin:0 0 6px 0;
+  line-height:1.4;
+}
+
+
+.img-logo{
+  width: 110px;
+  height: 110px;
+  margin: 40px;
+  border-radius: 10px;
+  border:5px solid rgb(0, 170, 255);
+}
+
+/* Efecto hover para las tarjetas */
+.tarjeta {
+  transition: all 0.3s ease; /* suaviza el cambio */
+  cursor: pointer; /* cambia el cursor para indicar que es interactivo */
+}
+
+.tarjeta:hover {
+  box-shadow: 0 6px 20px rgba(13, 0, 255, 0.15); /* sombra más intensa */
+  transform: translateY(-4px); /* efecto de “flotante” */
+  background-color: #f0f8ff; /* ligero cambio de color */
+}
+
+/* Selecciona el botón dentro del div con clase "agregar-anuncio" */
+.agregar-anuncio #btnAgregar {
+    background-color: #00124e; /* color normal del botón */
+    color: white;    
+    border: 2px solid white;          /* color del texto */
+    border-radius: 10px;
+    height: 40px;
+    width: 100%;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s; /* transición suave */
+}
+
+/* Cambia el color cuando pasas el mouse */
+.agregar-anuncio #btnAgregar:hover {
+    background-color: #0056b3; /* color al hacer hover */
+}
