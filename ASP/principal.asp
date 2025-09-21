@@ -5,7 +5,7 @@ docsPorFirmar =2
 faltasPorAprobar = 0
 diasDeVacaciones = 14
 diasAlFeriado = 30
-CEO = "no"  'simulo ser empleado
+CEO = "si"  'simulo ser empleado
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -86,19 +86,9 @@ CEO = "no"  'simulo ser empleado
                     <div class="numero-tarjeta"><%= diasDeVacaciones %></div>
                 </div>
 
-<!--                <div class="tarjeta">
-                    <div class="lado-izquierdo">
-                        <div class="icono-tarjeta">🌴</div>
-                        <div class="contenido-tarjeta">
-                            <div class="titulo-tarjeta">Feriado</div>
-                            <div class="subtitulo-tarjeta">Que viene</div>
-                        </div>
-                    </div>
-                    <div class="numero-tarjeta"><%= diasAlFeriado %> <span class="chiquito">días</span></div>
-                </div>
+
                  <% end if %>
-            </div>
-            -->
+    
 
                
 
