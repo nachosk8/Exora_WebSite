@@ -1,4 +1,6 @@
+
 <%@ Language="VBScript" %>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,13 +15,13 @@
 
     <!-- Usuario -->
     <div class="input-group">
-      <input type="text" id="username" placeholder=" " required maxlength="20" >
+      <input type="text" id="username" placeholder=" " required>
       <label for="username">Usuario</label>
     </div>
 
     <!-- Contraseña -->
-    <div class="input-group">
-      <input type="password" id="password" placeholder=" " required maxlength="20">
+    <div  class="input-group">
+      <input leng type="password" id="password" placeholder=" " required>
       <label for="password">Contraseña</label>
       <span  class="toggle-password"  onclick="togglePassword()">ocultar/mostrar </span>
     </div>
@@ -30,6 +32,10 @@
 
     <button class="login-btn">Ingresar</button>
 
+    <div class="footer-links">
+      <a href="#">Políticas de Privacidad</a>
+      <a href="#">¿Necesitás ayuda?</a>
+    </div>
   </div>
 
   <script>

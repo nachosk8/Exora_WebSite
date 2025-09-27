@@ -5,7 +5,7 @@ docsPorFirmar =2
 faltasPorAprobar = 0
 diasDeVacaciones = 14
 diasAlFeriado = 30
-CEO = "si"  'simulo ser empleado
+CEO = "no"  'simulo ser empleado
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -35,10 +35,8 @@ CEO = "si"  'simulo ser empleado
                 <ul>
                     <br><li><a href="http://localhost/Exora_WebSite/ASP/verDocumentos.asp">📄 DOCUMENTOS</a></li><br>
                     
-                    <% IF CEO <> "si" then%>
-                    <li><a href="http://localhost/Exora_WebSite/ASP">📅 CALENDARIO</a></li><br>
-                    <li><a href="#">🏖️ VACACIONES</a></li><br>
-                    <% else %>
+                    <li><a href="http://localhost/Exora_WebSite/ASP/calendario.asp">📅 LICENCIAS</a></li><br>
+                    <% IF CEO = "si" then %>
                     <div class="agregar-anuncio">
                         <button id="btnAgregar">PUBLICAR</button>
                     </div>
@@ -64,6 +62,7 @@ CEO = "si"  'simulo ser empleado
                     </div>
                 </a>
                 <% if CEO  <> "si" then %>
+                <a class="acceso-a-otra-pag" href="http://localhost/Exora_WebSite/ASP/calendario.asp">
                 <div class="tarjeta">
                     <div class="lado-izquierdo">
                         <div class="icono-tarjeta">📥</div>
@@ -74,6 +73,7 @@ CEO = "si"  'simulo ser empleado
                     </div>
                     <div class="numero-tarjeta"><%= faltasPorAprobar %></div>
                 </div>
+                </a>
             
                 <div class="tarjeta">
                     <div class="lado-izquierdo">

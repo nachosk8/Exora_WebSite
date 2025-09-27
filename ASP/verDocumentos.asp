@@ -34,10 +34,9 @@ CEO = "no"  'simulo ser empleado
             <nav>
                 <ul>          
                     <li><a href="http://localhost/Exora_WebSite/ASP/principal.asp">⬅ MENU PRINCIPAL</a></li><br>
-                    <% IF CEO <> "si" then%>
-                    <li><a href="http://localhost/Exora_WebSite/ASP">📅 CALENDARIO</a></li><br>
-                    <li><a href="#">🏖️ VACACIONES</a></li><br>
-                    <% end if %>
+
+                    <li><a href="http://localhost/Exora_WebSite/ASP">📅 LICENCIAS</a></li><br>
+
                 </ul>
             </nav>
         </aside>
