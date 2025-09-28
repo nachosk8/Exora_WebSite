@@ -20,7 +20,7 @@ Set datosUsuario = comandoSQL.Execute()
 
 nombreYApellido = datosUsuario("NombreApellido")
 esAdmin = datosUsuario("directivo")
-
+empresa = datosUsuario("empresa")
 datosUsuario.Close
 Set datosUsuario = Nothing
 Set comandoSQL = Nothing
@@ -142,7 +142,7 @@ document.getElementById("btnCrearAnuncio").addEventListener("click", function() 
     noticia.className = "noticia";
     noticia.innerHTML = `
         <div class="cabecera-noticia">
-            <div class="autor"><%=nombreYApellido%> - EXORA</div>
+            <div class="autor"><%=nombreYApellido + " - " + empresa%> </div>
         </div>
         <div class="cuerpo-noticia">
             <h3>${titulo}</h3>

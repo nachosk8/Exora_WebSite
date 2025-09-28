@@ -26,7 +26,7 @@ If sistemaArchivos.FolderExists(carpetaUploads) Then
     ' If LCase(sistemaArchivos.GetExtensionName(archivo.Name)) = "pdf" And InStr(LCase(archivo.Name), "archivo_subido") > 0 Then
     '     listaPDFs = listaPDFs & "<li><a href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a></li>"
     ' End If
-Next
+' Next
 
 End If
 
