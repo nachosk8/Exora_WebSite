@@ -1,12 +1,39 @@
 <%@ Language="VBScript" %>
+<!--#include file="conexion.asp"-->
+
 <%
+Const tipoVarChar = 200
+Const parametroEntrada = 1
+Const tipoProcedimientoAlmacenado = 4
+
+Dim usuarioPrincipal, comandoSQL, datosUsuario, nombreYApellido, esAdmin
+usuarioPrincipal = Session("usuario")
+
+Set comandoSQL = Server.CreateObject("ADODB.Command")
+Set comandoSQL.ActiveConnection = conn
+comandoSQL.CommandText = "DatosDelUsuario"
+comandoSQL.CommandType = tipoProcedimientoAlmacenado
+
+comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
+
+Set datosUsuario = comandoSQL.Execute()
+
+nombreYApellido = datosUsuario("NombreApellido")
+esAdmin = datosUsuario("directivo")
+
+datosUsuario.Close
+Set datosUsuario = Nothing
+Set comandoSQL = Nothing
+conn.Close
+Set conn = Nothing
+
 ' --- valores dinámicos de ejemplo ---
-docsPorFirmar =2
+docsPorFirmar = 2
 faltasPorAprobar = 0
 diasDeVacaciones = 14
 diasAlFeriado = 30
-CEO = "no"  'simulo ser empleado
 %>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -18,25 +45,21 @@ CEO = "no"  'simulo ser empleado
 <body>
     <header class="barra-superior">
         <div class="usuario">
-             JUAN IGNACIO SKREKA IVANESEVIC
-
-        </div><img src= "../imagenes/ndea.png" class="foto-de-perfil"/>
+             <%= nombreYApellido %>
+        </div>
         <div class="espacio"></div>
-        <div class="deslogin"><a class="link-deslog" href="http://localhost/Exora_WebSite/ASP/form.asp">Salir</a></div>
-
+        <div class="deslogin"><a class="link-deslog" href="http://localhost/Exora_WebSite/ASP/login.asp">Salir</a></div>
     </header>
-
 
     <div class="pantalla">
         <!-- Menú lateral -->
         <aside class="menu-lateral">
-            <img src= "../imagenes/logo.png" class="img-logo"/>
+            <img src="../imagenes/logo.png" class="img-logo"/>
             <nav>
                 <ul>
                     <br><li><a href="http://localhost/Exora_WebSite/ASP/verDocumentos.asp">📄 DOCUMENTOS</a></li><br>
-                    
                     <li><a href="http://localhost/Exora_WebSite/ASP/calendario.asp">📅 LICENCIAS</a></li><br>
-                    <% IF CEO = "si" then %>
+                    <% IF esAdmin = "S" then %>
                     <div class="agregar-anuncio">
                         <button id="btnAgregar">PUBLICAR</button>
                     </div>
@@ -50,7 +73,7 @@ CEO = "no"  'simulo ser empleado
             <!-- Cuadros de estadísticas -->
             <div class="cuadros-estadisticas">
                 <a class="acceso-a-otra-pag" href="http://localhost/Exora_WebSite/ASP/verDocumentos.asp">
-                    <div class="tarjeta" id ="ver_documentos">
+                    <div class="tarjeta" id="ver_documentos">
                         <div class="lado-izquierdo">
                             <div class="icono-tarjeta">📄</div>
                             <div class="contenido-tarjeta">
@@ -61,20 +84,21 @@ CEO = "no"  'simulo ser empleado
                         <div class="numero-tarjeta"><%= docsPorFirmar %></div>
                     </div>
                 </a>
-                <% if CEO  <> "si" then %>
+
+                <% IF esAdmin <> "S" THEN %>
                 <a class="acceso-a-otra-pag" href="http://localhost/Exora_WebSite/ASP/calendario.asp">
-                <div class="tarjeta">
-                    <div class="lado-izquierdo">
-                        <div class="icono-tarjeta">📥</div>
-                        <div class="contenido-tarjeta">
-                            <div class="titulo-tarjeta">Faltas</div>
-                            <div class="subtitulo-tarjeta">Por aprobar</div>
+                    <div class="tarjeta">
+                        <div class="lado-izquierdo">
+                            <div class="icono-tarjeta">📥</div>
+                            <div class="contenido-tarjeta">
+                                <div class="titulo-tarjeta">Faltas</div>
+                                <div class="subtitulo-tarjeta">Por aprobar</div>
+                            </div>
                         </div>
+                        <div class="numero-tarjeta"><%= faltasPorAprobar %></div>
                     </div>
-                    <div class="numero-tarjeta"><%= faltasPorAprobar %></div>
-                </div>
                 </a>
-            
+
                 <div class="tarjeta">
                     <div class="lado-izquierdo">
                         <div class="icono-tarjeta">🏖️</div>
@@ -85,25 +109,20 @@ CEO = "no"  'simulo ser empleado
                     </div>
                     <div class="numero-tarjeta"><%= diasDeVacaciones %></div>
                 </div>
-
-
-                 <% end if %>
-    
-
-               
-
+                <% END IF %>
+            </div>
         </main>
-    
- 
-<!-- Formulario oculto -->
-    <div class="form-anuncio" id="formAnuncio" style="display:none; margin-top:10px;">
-    <input type="text" id="tituloAnuncio" placeholder="Título del anuncio" style="width:100%; margin-bottom:6px; padding:6px;">
-    <textarea id="parrafoAnuncio" placeholder="Contenido del anuncio" style="width:100%; padding:6px;"></textarea>
-    <button id="btnCrearAnuncio" style="margin-top:6px;">Crear anuncio</button>
-</div>
+
+        <!-- Formulario oculto para anuncios -->
+        <div class="form-anuncio" id="formAnuncio" style="display:none; margin-top:10px;">
+            <input type="text" id="tituloAnuncio" placeholder="Título del anuncio" style="width:100%; margin-bottom:6px; padding:6px;">
+            <textarea id="parrafoAnuncio" placeholder="Contenido del anuncio" style="width:100%; padding:6px;"></textarea>
+            <button id="btnCrearAnuncio" style="margin-top:6px;">Crear anuncio</button>
+        </div>
     </div>
-</body>..
+</body>
 </html>
+
 <script>
 document.getElementById("btnAgregar").addEventListener("click", function() {
     let form = document.getElementById("formAnuncio");
@@ -123,7 +142,7 @@ document.getElementById("btnCrearAnuncio").addEventListener("click", function() 
     noticia.className = "noticia";
     noticia.innerHTML = `
         <div class="cabecera-noticia">
-            <div class="autor">EXORA</div>
+            <div class="autor"><%=nombreYApellido%> - EXORA</div>
         </div>
         <div class="cuerpo-noticia">
             <h3>${titulo}</h3>

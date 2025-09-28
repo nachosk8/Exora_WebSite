@@ -20,7 +20,7 @@ CEO = "no"  'simulo ser empleado
         <div class="usuario">
              JUAN IGNACIO SKREKA IVANESEVIC
 
-        </div><img src= "../imagenes/ndea.png" class="foto-de-perfil"/>
+        </div>
         <div class="espacio"></div>
         <div class="deslogin"><a class="link-deslog" href="http://localhost/Exora_WebSite/ASP/form.asp">Salir</a></div>
 
