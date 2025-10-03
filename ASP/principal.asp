@@ -1,6 +1,7 @@
+
 <%@ Language="VBScript" %>
 <!--#include file="conexion.asp"-->
-
+<!--#include file="debug.asp" -->
 <%
 Const tipoVarChar = 200
 Const parametroEntrada = 1
@@ -17,15 +18,56 @@ comandoSQL.CommandType = tipoProcedimientoAlmacenado
 comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
 
 Set datosUsuario = comandoSQL.Execute()
-
 nombreYApellido = datosUsuario("NombreApellido")
 esAdmin = datosUsuario("directivo")
 empresa = datosUsuario("empresa")
 datosUsuario.Close
 Set datosUsuario = Nothing
 Set comandoSQL = Nothing
+
+Set comandoSQL = Server.CreateObject("ADODB.Command")
+Set comandoSQL.ActiveConnection = conn
+comandoSQL.CommandText = "VerPublicaciones"
+comandoSQL.CommandType = tipoProcedimientoAlmacenado
+
+comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
+
+Set publicacionesRS = comandoSQL.Execute()
+
+If Not publicacionesRS.EOF Then
+    If publicacionesRS("Error") = 0 Then
+        ' Avanzar al siguiente recordset → las publicaciones
+      
+
+        ' Mostrar publicaciones
+        Response.Write "<h3>Publicaciones</h3>"
+        Response.Write "<table border=1 cellpadding=4>"
+        Do While Not publicacionesRS.EOF
+            Response.Write "<tr>"
+            Response.Write "<td>" & publicacionesRS("Titulo") & "</td>"
+            Response.Write "<td>" & publicacionesRS("Contenido") & "</td>"
+            Response.Write "<td>" & publicacionesRS("Fecha") & "</td>"
+            Response.Write "</tr>"
+            publicacionesRS.MoveNext
+        Loop
+        Response.Write "</table>"
+
+    Else
+        Response.Write "<p>No hay publicaciones para este usuario.</p>"
+    End If
+End If
+
+Set comandoSQL = Nothing
+
+
 conn.Close
 Set conn = Nothing
+
+
+
+
+
+
 
 ' --- valores dinámicos de ejemplo ---
 docsPorFirmar = 2

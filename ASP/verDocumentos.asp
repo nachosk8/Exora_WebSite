@@ -1,5 +1,9 @@
+
 <%@ Language="VBScript" %>
+<!--#include file="conexion.asp"-->
+<!--#include file="debug.asp" -->
 <%
+
 ' --- valores dinámicos de ejemplo ---
 documentosPorFirmar = 2
 faltasPorAprobar = 0
