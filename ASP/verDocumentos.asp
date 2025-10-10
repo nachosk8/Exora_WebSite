@@ -5,16 +5,19 @@
 <%
 
 ' --- valores dinámicos de ejemplo ---
+dim NombreApellido
 documentosPorFirmar = 2
 faltasPorAprobar = 0
 diasDeVacaciones = 14
 diasAlFeriado = 30
 esCEO = "no"
+NombreApellido = Session("nombre")
+
 
 ' Ruta donde están los PDFs
-Dim carpetaUploads, sistemaArchivos, carpeta, archivo, listaPDFs
+Dim carpetaUploads, sistemaArchivos, carpeta, archivo, listaPDFs, usuarioPrincipal
 carpetaUploads = "C:\PRASP\Exora_WebSite\Uploads"
-
+usuarioPrincipal = Session("usuario")
 Set sistemaArchivos = Server.CreateObject("Scripting.FileSystemObject")
 
 listaPDFs = ""
@@ -62,7 +65,7 @@ Set sistemaArchivos = Nothing
 </head>
 <body>
 <header class="barra-superior">
-    <div class="usuario">JUAN IGNACIO SKREKA IVANESEVIC</div>
+    <div class="usuario"><%=NombreApellido%></div>
     <div class="espacio"></div>
     <div class="deslogin">
         <a class="link-deslog" href="http://localhost/Exora_WebSite/ASP/login.asp">Salir</a>

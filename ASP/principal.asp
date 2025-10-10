@@ -47,6 +47,7 @@ comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar,
 Set datosUsuario = comandoSQL.Execute()
 
 nombreYApellido = datosUsuario("NombreApellido")
+Session("nombre") = nombreYApellido
 esAdmin = datosUsuario("directivo")
 empresa = datosUsuario("empresa")
 
