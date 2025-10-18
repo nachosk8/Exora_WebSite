@@ -49,6 +49,7 @@ Set datosUsuario = comandoSQL.Execute()
 nombreYApellido = datosUsuario("NombreApellido")
 Session("nombre") = nombreYApellido
 esAdmin = datosUsuario("directivo")
+Session("admin") = esAdmin
 empresa = datosUsuario("empresa")
 
 datosUsuario.Close

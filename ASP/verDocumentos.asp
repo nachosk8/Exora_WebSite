@@ -7,13 +7,13 @@ Const parametroEntrada = 1
 Const tipoProcedimientoAlmacenado = 4
 
 ' --- valores dinámicos de ejemplo ---
-dim NombreApellido, comandoSQL
+dim NombreApellido, comandoSQL, Admin
 faltasPorAprobar = 0
 diasDeVacaciones = 14
 diasAlFeriado = 30
-esCEO = "no"
-NombreApellido = Session("nombre")
 
+NombreApellido = Session("nombre")
+Admin = Session("admin")
 ' --- Manejo de PDFs ---
 Dim carpetaUploads, sistemaArchivos, carpeta, archivo
 Dim usuarioPrincipal, TotalPendientes, TotalFirmados
@@ -211,7 +211,7 @@ Set conn = Nothing
             <button class="tab" data-target="firmados" type="button">
                 Firmados <span class="badge"><%=TotalFirmados%></span>
             </button>
-            <button class="tab" data-target="cargar" type="button">Cargar PDF</button>
+            <%if Admin = "S" then%><button class="tab" data-target="cargar" type="button">Cargar PDF</button><%end if 'SOLO EL ADMIN PUEDE CARGAR PDFS%> 
         </div>
 
         <div class="lista-tarjetas">
