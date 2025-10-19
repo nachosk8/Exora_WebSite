@@ -39,7 +39,6 @@ comandoSQL.CommandType = tipoProcedimientoAlmacenado
 comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
 Set usuariosEmpresaRS = comandoSQL.Execute()
 
-verrs usuariosEmpresaRS     
 ' ============================================================
 ' 🚀 LLAMADA A SP PARA PENDIENTES (E)
 ' ============================================================
