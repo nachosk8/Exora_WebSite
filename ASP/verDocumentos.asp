@@ -27,6 +27,19 @@ listaPDFs = ""
 listaFirmados = ""
 Set sistemaArchivos = Server.CreateObject("Scripting.FileSystemObject")
 
+
+
+
+
+
+Set comandoSQL = Server.CreateObject("ADODB.Command")
+Set comandoSQL.ActiveConnection = conn
+comandoSQL.CommandText = "UsuariosDeLaEmpresa"
+comandoSQL.CommandType = tipoProcedimientoAlmacenado
+comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
+Set usuariosEmpresaRS = comandoSQL.Execute()
+
+verrs usuariosEmpresaRS     
 ' ============================================================
 ' 🚀 LLAMADA A SP PARA PENDIENTES (E)
 ' ============================================================
@@ -38,7 +51,7 @@ Set cmd.ActiveConnection = conn
 cmd.CommandText = "Get_Archivos"
 cmd.CommandType = tipoProcedimientoAlmacenado
 cmd.Parameters.Append cmd.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
-cmd.Parameters.Append cmd.CreateParameter("@Enviado_Recibido", tipoVarChar, parametroEntrada, 1, "E")
+cmd.Parameters.Append cmd.CreateParameter("@Enviado_Recibido", tipoVarChar, parametroEntrada, 1, "R")
 Set rs = cmd.Execute()
 
 If Not rs.EOF Then
@@ -76,7 +89,7 @@ Set cmd2.ActiveConnection = conn
 cmd2.CommandText = "Get_Archivos"
 cmd2.CommandType = tipoProcedimientoAlmacenado
 cmd2.Parameters.Append cmd2.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
-cmd2.Parameters.Append cmd2.CreateParameter("@Enviado_Recibido", tipoVarChar, parametroEntrada, 1, "R")
+cmd2.Parameters.Append cmd2.CreateParameter("@Enviado_Recibido", tipoVarChar, parametroEntrada, 1, "E")
 Set rs2 = cmd2.Execute()
 
 If Not rs2.EOF Then
@@ -211,7 +224,10 @@ Set conn = Nothing
             <button class="tab" data-target="firmados" type="button">
                 Firmados <span class="badge"><%=TotalFirmados%></span>
             </button>
-            <%if Admin = "S" then%><button class="tab" data-target="cargar" type="button">Cargar PDF</button><%end if 'SOLO EL ADMIN PUEDE CARGAR PDFS%> 
+            <%if Admin = "S" then%><button class="tab" data-target="cargar" type="button">Cargar PDF</button>
+            
+            
+            <%end if 'SOLO EL ADMIN PUEDE CARGAR PDFS%> 
         </div>
 
         <div class="lista-tarjetas">
