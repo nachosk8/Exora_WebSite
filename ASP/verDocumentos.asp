@@ -14,6 +14,7 @@ diasAlFeriado = 30
 
 NombreApellido = Session("nombre")
 Admin = Session("admin")
+
 ' --- Manejo de PDFs ---
 Dim carpetaUploads, sistemaArchivos, carpeta, archivo
 Dim usuarioPrincipal, TotalPendientes, TotalFirmados
@@ -27,11 +28,6 @@ listaPDFs = ""
 listaFirmados = ""
 Set sistemaArchivos = Server.CreateObject("Scripting.FileSystemObject")
 
-
-
-
-
-
 Set comandoSQL = Server.CreateObject("ADODB.Command")
 Set comandoSQL.ActiveConnection = conn
 comandoSQL.CommandText = "UsuariosDeLaEmpresa"
@@ -44,7 +40,6 @@ Set usuariosEmpresaRS = comandoSQL.Execute()
 ' ============================================================
 Dim cmd, rs, palabrasPendientes, tmpListaE
 tmpListaE = ""
-
 Set cmd = Server.CreateObject("ADODB.Command")
 Set cmd.ActiveConnection = conn
 cmd.CommandText = "Get_Archivos"
@@ -82,7 +77,6 @@ Set cmd = Nothing
 ' ============================================================
 Dim cmd2, rs2, palabrasFirmados, tmpListaR
 tmpListaR = ""
-
 Set cmd2 = Server.CreateObject("ADODB.Command")
 Set cmd2.ActiveConnection = conn
 cmd2.CommandText = "Get_Archivos"
@@ -114,11 +108,9 @@ End If
 
 Set rs2 = Nothing
 Set cmd2 = Nothing
-' ============================================================
-
 
 ' ============================================================
-' 📂 RECORRIDO DE ARCHIVOS LOCALES (PENDIENTES)
+' 📂 RECORRIDO DE ARCHIVOS LOCALES
 ' ============================================================
 If sistemaArchivos.FolderExists(carpetaUploads) Then
     Set carpeta = sistemaArchivos.GetFolder(carpetaUploads)
@@ -143,9 +135,6 @@ If sistemaArchivos.FolderExists(carpetaUploads) Then
         End If
     Next
 
-    ' ============================================================
-    ' 📂 RECORRIDO DE ARCHIVOS LOCALES (FIRMADOS)
-    ' ============================================================
     For Each archivo In carpeta.Files
         If LCase(sistemaArchivos.GetExtensionName(archivo.Name)) = "pdf" Then
             Dim nombreArchivo2, coincide2, palabra2
@@ -166,34 +155,33 @@ If sistemaArchivos.FolderExists(carpetaUploads) Then
         End If
     Next
 End If
-
-Set carpeta = Nothing
-Set sistemaArchivos = Nothing
-conn.Close
-Set conn = Nothing
 %>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Inicio</title>
-    <link rel="stylesheet" href="../css/estilo_verDocs.css">
-    <style>
-        #visorPDF {
-            flex: 1;
-            border: 1px solid #ddd;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            margin-top: 10px;
-        }
-        #listaPDFs, #listaFirmados {
-            display: none;
-            margin-top: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inicio</title>
+<link rel="stylesheet" href="../css/estilo_verDocs.css">
+<style>
+#visorPDF {
+    flex: 1;
+    border: 1px solid #ddd;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+#listaPDFs, #listaFirmados { display: none; margin-top: 10px; }
+#selectorUsuarioBox {
+    display: none;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    padding: 8px;
+    background: #fafafa;
+}
+</style>
 </head>
 <body>
 <header class="barra-superior">
@@ -223,31 +211,50 @@ Set conn = Nothing
             <button class="tab" data-target="firmados" type="button">
                 Firmados <span class="badge"><%=TotalFirmados%></span>
             </button>
-            <%if Admin = "S" then%><button class="tab" data-target="cargar" type="button">Cargar PDF</button>
-            
-            
-            <%end if 'SOLO EL ADMIN PUEDE CARGAR PDFS%> 
+            <%if Admin = "S" then%>
+                <button class="tab" data-target="cargar" type="button">Cargar PDF</button>
+            <%end if%> 
         </div>
 
         <div class="lista-tarjetas">
             <div class="tarjeta" data-grupo="pendientes">
-                <ul id="listaPDFs">
-                    <%=listaPDFs%>
-                </ul>
+                <ul id="listaPDFs"><%=listaPDFs%></ul>
             </div>
-
             <div class="tarjeta" data-grupo="firmados">
-                <ul id="listaFirmados">
-                    <%=listaFirmados%>
-                </ul>
+                <ul id="listaFirmados"><%=listaFirmados%></ul>
             </div>
         </div>
-    </main>
+
+        <div id="selectorUsuarioBox">
+            <label for="selectorUsuario"><strong>Seleccioná destinatario:</strong></label><br>
+            <select id="selectorUsuario">
+                <option value="">-- Seleccione un destinatario --</option>
+                <% 
+                If Not usuariosEmpresaRS.EOF Then
+                    Do While Not usuariosEmpresaRS.EOF
+                        Response.Write "<option value='" & usuariosEmpresaRS("usuario") & "'>" & usuariosEmpresaRS("NombreApellido") & "</option>"
+                        usuariosEmpresaRS.MoveNext
+                    Loop
+                Else
+                    Response.Write "<option value=''>No hay usuarios disponibles</option>"
+                End If
+                %>
+            </select>
+            <button id="btnSeleccionOK" type="button">OK</button>
+        </div>
+    </main> 
 
     <div id="visorPDF"></div>
     <div id="adjuntar" style="display:none;">Arrastra y suelta un PDF aquí</div>
     <button id="btnGuardar" style="display:none;">Guardar PDF</button>
 </div>
+
+<%
+Set carpeta = Nothing
+Set sistemaArchivos = Nothing
+conn.Close
+Set conn = Nothing
+%>
 
 <script>
 document.addEventListener('DOMContentLoaded', function(){
@@ -257,31 +264,52 @@ document.addEventListener('DOMContentLoaded', function(){
     const listaFirmados = document.getElementById("listaFirmados");
     const adjuntar = document.getElementById("adjuntar");
     const btnGuardar = document.getElementById("btnGuardar");
+    const selectorBox = document.getElementById("selectorUsuarioBox");
+    const selector = document.getElementById("selectorUsuario");
+    const btnOK = document.getElementById("btnSeleccionOK");
 
     let archivoPDF = null;
 
     function activarTab(target) {
         tabs.forEach(t => t.classList.remove("activo"));
         document.querySelector(`.tab[data-target="${target}"]`).classList.add("activo");
-
         visor.style.display = "none";
         listaPDFs.style.display = "none";
         listaFirmados.style.display = "none";
         adjuntar.style.display = "none";
         btnGuardar.style.display = "none";
+        selectorBox.style.display = "none";
 
         if(target === "pendientes") listaPDFs.style.display = "block";
         if(target === "firmados") listaFirmados.style.display = "block";
-        if(target === "cargar") {
-            adjuntar.style.display = "block";
-            visor.style.display = "flex";
-        }
+        if(target === "cargar") selectorBox.style.display = "block";
     }
 
     activarTab("pendientes");
 
     tabs.forEach(tab => {
         tab.addEventListener("click", () => activarTab(tab.dataset.target));
+    });
+
+    // 💾 Guardar destinatario en Session sin recargar
+    btnOK.addEventListener("click", function(){
+        const val = selector.value;
+        if(!val){
+            alert("Debes seleccionar un destinatario antes de continuar.");
+            return;
+        }
+
+        fetch("guardar_destinatario.asp?user=" + encodeURIComponent(val))
+            .then(res => res.text())
+            .then(txt => {
+                console.log("Respuesta del servidor:", txt);
+                alert("Destinatario guardado en sesión: " + val);
+            })
+            .catch(err => alert("Error al guardar destinatario: " + err));
+
+        selectorBox.style.display = "none";
+        adjuntar.style.display = "block";
+        visor.style.display = "flex";
     });
 
     adjuntar.addEventListener("dragover", e => { e.preventDefault(); adjuntar.style.background = "#eef"; });
@@ -303,13 +331,10 @@ document.addEventListener('DOMContentLoaded', function(){
         if(!archivoPDF) return alert("No hay archivo cargado");
         const formData = new FormData();
         formData.append("archivoPDF", archivoPDF);
-        fetch("guardar_pdf.asp", {
-            method: "POST",
-            body: formData
-        }).then(res => res.text()).then(resp => {
-            alert(resp);
-            location.reload();
-        }).catch(err => alert("Error subiendo archivo: " + err));
+        fetch("guardar_pdf.asp", { method: "POST", body: formData })
+            .then(res => res.text())
+            .then(resp => { alert(resp); location.reload(); })
+            .catch(err => alert("Error subiendo archivo: " + err));
     });
 });
 </script>

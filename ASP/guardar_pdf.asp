@@ -29,7 +29,7 @@ On Error GoTo 0
 ' ----------------------------
 ' Variables y carpeta de guardado
 ' ----------------------------
-Dim UploadDir, fso, objStream, FileName, path, cmd, usuarioPrincipal
+Dim UploadDir, fso, objStream, FileName, path, cmd, usuarioPrincipal, usuarioDestino
 UploadDir = "C:\PRASP\Exora_WebSite\Uploads"
 
 Set fso = Server.CreateObject("Scripting.FileSystemObject")
@@ -55,8 +55,8 @@ If Request.TotalBytes > 0 Then
     binData = Request.BinaryRead(Request.TotalBytes)
 
     ' Generar nombre único
+    usuarioDestino = Session("destinatario")
     usuarioPrincipal = Session("usuario")
-
     FileName = "archivo_"&usuarioPrincipal&"_" & Replace(Replace(Replace(Now(), ":", "-"), " ", "_"), "/", "-") & ".pdf"
     path = UploadDir & "\" & FileName
 
@@ -95,7 +95,7 @@ If Request.TotalBytes > 0 Then
 
     ' Parámetros hardcodeados por ahora (luego sustituir por Session / Request.Form)
     cmd.Parameters.Append cmd.CreateParameter("@remitente", 200, 1, 20, usuarioPrincipal)    ' adVarChar = 200
-    cmd.Parameters.Append cmd.CreateParameter("@destinatario", 200, 1, 20, "marcos")
+    cmd.Parameters.Append cmd.CreateParameter("@destinatario", 200, 1, 20, usuarioDestino)
     cmd.Parameters.Append cmd.CreateParameter("@path", 200, 1, 50, FileName)
     cmd.Parameters.Append cmd.CreateParameter("@firma", 200, 1, 1, "N")
 
