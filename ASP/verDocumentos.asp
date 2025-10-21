@@ -13,8 +13,6 @@ diasAlFeriado = 30
 
 NombreApellido = Session("nombre")
 Admin = Session("admin")
-Admin = "N"
-
 Dim carpetaUploads, sistemaArchivos, carpeta, archivo
 Dim usuarioPrincipal, TotalPendientes, TotalFirmados
 Dim listaPDFs, listaFirmados
@@ -240,6 +238,7 @@ End If
             </div>
         </div>
 
+        <%if Admin = "S" then%>
         <div id="selectorUsuarioBox">
             <label for="selectorUsuario"><strong>Seleccioná destinatario:</strong></label><br>
             <select id="selectorUsuario">
@@ -257,6 +256,7 @@ End If
             </select>
             <button id="btnSeleccionOK" type="button">OK</button>
         </div>
+        <%end if%>
     </main> 
 
     <div id="visorPDF"></div>
@@ -273,7 +273,7 @@ Set conn = Nothing
 
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    const tabs = document.querySelectorAll('.tab');
+    const tabs = Array.from(document.querySelectorAll('.tab') || []);
     const visor = document.getElementById("visorPDF");
     const listaPDFs = document.getElementById("listaPDFs");
     const listaFirmados = document.getElementById("listaFirmados");
@@ -282,88 +282,123 @@ document.addEventListener('DOMContentLoaded', function(){
     const selectorBox = document.getElementById("selectorUsuarioBox");
     const selector = document.getElementById("selectorUsuario");
     const btnOK = document.getElementById("btnSeleccionOK");
-    const botonesFirmar = document.querySelectorAll('.btnFirmar');
+    const botonesFirmar = Array.from(document.querySelectorAll('.btnFirmar') || []);
 
     let archivoPDF = null;
     let archivoSeleccionado = null;
+    let destinatario = null;
+
+    // SAFELY determine admin flag (server injects Admin)
+    const esAdmin = '<%= Admin %>' === 'S';
 
     function activarTab(target) {
-        tabs.forEach(t => t.classList.remove("activo"));
-        document.querySelector(`.tab[data-target="${target}"]`).classList.add("activo");
-        visor.style.display = "none";
-        listaPDFs.style.display = "none";
-        listaFirmados.style.display = "none";
-        adjuntar.style.display = "none";
-        btnGuardar.style.display = "none";
-        selectorBox.style.display = "none";
+        // remove activo from any tab buttons that exist
+        tabs.forEach(t => {
+            if(t && t.classList) t.classList.remove("activo");
+        });
 
-        if(target === "pendientes") listaPDFs.style.display = "block";
-        if(target === "firmados") listaFirmados.style.display = "block";
-        if(target === "cargar") selectorBox.style.display = "block";
+        // add activo to the matching tab button (if exists)
+        const activeBtn = document.querySelector(`.tab[data-target="${target}"]`);
+        if(activeBtn && activeBtn.classList) activeBtn.classList.add("activo");
+
+        if(visor) visor.style.display = "none";
+        if(listaPDFs) listaPDFs.style.display = "none";
+        if(listaFirmados) listaFirmados.style.display = "none";
+        if(adjuntar) adjuntar.style.display = "none";
+        if(btnGuardar) btnGuardar.style.display = "none";
+        if(selectorBox) selectorBox.style.display = "none";
+
+        if(target === "pendientes" && listaPDFs) listaPDFs.style.display = "block";
+        if(target === "firmados" && listaFirmados) listaFirmados.style.display = "block";
+
+        if(target === "cargar") {
+            if(esAdmin) {
+                if(selectorBox) selectorBox.style.display = "block";
+            } else {
+                if(adjuntar) adjuntar.style.display = "block";
+                if(visor) visor.style.display = "flex";
+            }
+        }
     }
 
+    // initial tab
     activarTab("pendientes");
 
+    // attach click listeners to tab buttons (if buttons exist)
     tabs.forEach(tab => {
-        tab.addEventListener("click", () => activarTab(tab.dataset.target));
+        if(tab) tab.addEventListener("click", function(){ activarTab(tab.dataset.target); });
     });
 
-    // 💾 Guardar destinatario
-    btnOK.addEventListener("click", function(){
-        const val = selector.value;
-        if(!val){
-            alert("Debes seleccionar un destinatario antes de continuar.");
-            return;
-        }
+    // 💾 Guardar destinatario (solo admin) - only if elements exist
+    if(esAdmin && btnOK && selector && selectorBox && adjuntar && visor) {
+        btnOK.addEventListener("click", function(){
+            const val = selector.value;
+            if(!val){
+                alert("Debes seleccionar un destinatario antes de continuar.");
+                return;
+            }
+            destinatario = val;
+            // keep existing behavior: save destinatario in session
+            fetch("guardar_destinatario.asp?user=" + encodeURIComponent(val))
+                .then(res => res.text())
+                .then(txt => alert("Destinatario guardado en sesión: " + val))
+                .catch(err => alert("Error al guardar destinatario: " + err));
 
-        fetch("guardar_destinatario.asp?user=" + encodeURIComponent(val))
-            .then(res => res.text())
-            .then(txt => {
-                alert("Destinatario guardado en sesión: " + val);
-            })
-            .catch(err => alert("Error al guardar destinatario: " + err));
-
-        selectorBox.style.display = "none";
-        adjuntar.style.display = "block";
-        visor.style.display = "flex";
-    });
-
-    // 🔹 Evento firmar (no admin)
-    botonesFirmar.forEach(b => {
-        b.addEventListener('click', e => {
-            archivoSeleccionado = e.target.dataset.archivo;
-            alert("Vas a firmar el archivo: " + archivoSeleccionado);
-            activarTab('cargar');
-        });
-    });
-
-    // Drag & Drop PDF
-    adjuntar.addEventListener("dragover", e => { e.preventDefault(); adjuntar.style.background = "#eef"; });
-    adjuntar.addEventListener("dragleave", () => adjuntar.style.background = "");
-    adjuntar.addEventListener("drop", e => {
-        e.preventDefault();
-        adjuntar.style.background = "";
-        const file = e.dataTransfer.files[0];
-        if(file && file.type === "application/pdf"){
-            archivoPDF = file;
-            const url = URL.createObjectURL(file);
-            visor.innerHTML = `<iframe src="${url}" width="100%" height="600px"></iframe>`;
+            selectorBox.style.display = "none";
+            adjuntar.style.display = "block";
             visor.style.display = "flex";
-            btnGuardar.style.display = "inline-block";
-        } else alert("Solo se aceptan archivos PDF");
-    });
+        });
+    } else {
+        // no-admin: hardcode destinatario
+        destinatario = "skreka";
+    }
 
-    // Guardar PDF
-    btnGuardar.addEventListener("click", function(){
-        if(!archivoPDF) return alert("No hay archivo cargado");
-        const formData = new FormData();
-        formData.append("archivoPDF", archivoPDF);
-        if(archivoSeleccionado) formData.append("original", archivoSeleccionado);
-        fetch("guardar_pdf.asp", { method: "POST", body: formData })
-            .then(res => res.text())
-            .then(resp => { alert(resp); location.reload(); })
-            .catch(err => alert("Error subiendo archivo: " + err));
-    });
+    // 🔹 Evento firmar (no admin): attach only if botonesFirmar exist
+    if(botonesFirmar && botonesFirmar.length > 0) {
+        botonesFirmar.forEach(b => {
+            if(!b) return;
+            b.addEventListener('click', function(e){
+                archivoSeleccionado = e.currentTarget.dataset.archivo || null;
+                alert("Vas a firmar el archivo: " + (archivoSeleccionado || "(sin nombre)"));
+                activarTab('cargar');
+            });
+        });
+    }
+
+    // Drag & Drop PDF - guard with element checks
+    if(adjuntar) {
+        adjuntar.addEventListener("dragover", function(e){ e.preventDefault(); if(adjuntar) adjuntar.style.background = "#eef"; });
+        adjuntar.addEventListener("dragleave", function(){ if(adjuntar) adjuntar.style.background = ""; });
+        adjuntar.addEventListener("drop", function(e){
+            e.preventDefault();
+            if(adjuntar) adjuntar.style.background = "";
+            const file = e.dataTransfer.files[0];
+            if(file && file.type === "application/pdf"){
+                archivoPDF = file;
+                const url = URL.createObjectURL(file);
+                if(visor) visor.innerHTML = `<iframe src="${url}" width="100%" height="600px"></iframe>`;
+                if(visor) visor.style.display = "flex";
+                if(btnGuardar) btnGuardar.style.display = "inline-block";
+            } else {
+                alert("Solo se aceptan archivos PDF");
+            }
+        });
+    }
+
+    // Guardar PDF - safe check
+    if(btnGuardar) {
+        btnGuardar.addEventListener("click", function(){
+            if(!archivoPDF) return alert("No hay archivo cargado");
+            const formData = new FormData();
+            formData.append("archivoPDF", archivoPDF);
+            if(archivoSeleccionado) formData.append("original", archivoSeleccionado);
+            formData.append("destinatario", destinatario);
+            fetch("guardar_pdf.asp", { method: "POST", body: formData })
+                .then(res => res.text())
+                .then(resp => { alert(resp); location.reload(); })
+                .catch(err => alert("Error subiendo archivo: " + err));
+        });
+    }
 });
 </script>
 </body>
