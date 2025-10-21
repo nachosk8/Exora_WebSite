@@ -6,7 +6,6 @@ Const tipoVarChar = 200
 Const parametroEntrada = 1
 Const tipoProcedimientoAlmacenado = 4
 
-' --- valores dinámicos de ejemplo ---
 dim NombreApellido, comandoSQL, Admin
 faltasPorAprobar = 0
 diasDeVacaciones = 14
@@ -14,8 +13,8 @@ diasAlFeriado = 30
 
 NombreApellido = Session("nombre")
 Admin = Session("admin")
+Admin = "N"
 
-' --- Manejo de PDFs ---
 Dim carpetaUploads, sistemaArchivos, carpeta, archivo
 Dim usuarioPrincipal, TotalPendientes, TotalFirmados
 Dim listaPDFs, listaFirmados
@@ -36,7 +35,7 @@ comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar,
 Set usuariosEmpresaRS = comandoSQL.Execute()
 
 ' ============================================================
-' 🚀 LLAMADA A SP PARA PENDIENTES (E)
+' 🚀 LLAMADA A SP PARA PENDIENTES (R)
 ' ============================================================
 Dim cmd, rs, palabrasPendientes, tmpListaE
 tmpListaE = ""
@@ -73,7 +72,7 @@ Set rs = Nothing
 Set cmd = Nothing
 
 ' ============================================================
-' 🚀 LLAMADA A SP PARA FIRMADOS (R)
+' 🚀 LLAMADA A SP PARA FIRMADOS (E)
 ' ============================================================
 Dim cmd2, rs2, palabrasFirmados, tmpListaR
 tmpListaR = ""
@@ -130,7 +129,11 @@ If sistemaArchivos.FolderExists(carpetaUploads) Then
 
             If coincide Then
                 TotalPendientes = TotalPendientes + 1
-                listaPDFs = listaPDFs & "<li><a href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a></li>"
+                listaPDFs = listaPDFs & "<li><a href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a>"
+                If Admin <> "S" Then
+                    listaPDFs = listaPDFs & " <button class='btnFirmar' data-archivo='" & archivo.Name & "'>Firmar</button>"
+                End If
+                listaPDFs = listaPDFs & "</li>"
             End If
         End If
     Next
@@ -181,6 +184,16 @@ End If
     padding: 8px;
     background: #fafafa;
 }
+.btnFirmar {
+    margin-left: 10px;
+    background-color: #2d89ef;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btnFirmar:hover { background-color: #1b5fbf; }
 </style>
 </head>
 <body>
@@ -213,6 +226,8 @@ End If
             </button>
             <%if Admin = "S" then%>
                 <button class="tab" data-target="cargar" type="button">Cargar PDF</button>
+            <%else%>
+                <button class="tab" data-target="cargar" type="button">Firmar PDF</button>
             <%end if%> 
         </div>
 
@@ -267,8 +282,10 @@ document.addEventListener('DOMContentLoaded', function(){
     const selectorBox = document.getElementById("selectorUsuarioBox");
     const selector = document.getElementById("selectorUsuario");
     const btnOK = document.getElementById("btnSeleccionOK");
+    const botonesFirmar = document.querySelectorAll('.btnFirmar');
 
     let archivoPDF = null;
+    let archivoSeleccionado = null;
 
     function activarTab(target) {
         tabs.forEach(t => t.classList.remove("activo"));
@@ -291,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function(){
         tab.addEventListener("click", () => activarTab(tab.dataset.target));
     });
 
-    // 💾 Guardar destinatario en Session sin recargar
+    // 💾 Guardar destinatario
     btnOK.addEventListener("click", function(){
         const val = selector.value;
         if(!val){
@@ -302,7 +319,6 @@ document.addEventListener('DOMContentLoaded', function(){
         fetch("guardar_destinatario.asp?user=" + encodeURIComponent(val))
             .then(res => res.text())
             .then(txt => {
-                console.log("Respuesta del servidor:", txt);
                 alert("Destinatario guardado en sesión: " + val);
             })
             .catch(err => alert("Error al guardar destinatario: " + err));
@@ -312,6 +328,16 @@ document.addEventListener('DOMContentLoaded', function(){
         visor.style.display = "flex";
     });
 
+    // 🔹 Evento firmar (no admin)
+    botonesFirmar.forEach(b => {
+        b.addEventListener('click', e => {
+            archivoSeleccionado = e.target.dataset.archivo;
+            alert("Vas a firmar el archivo: " + archivoSeleccionado);
+            activarTab('cargar');
+        });
+    });
+
+    // Drag & Drop PDF
     adjuntar.addEventListener("dragover", e => { e.preventDefault(); adjuntar.style.background = "#eef"; });
     adjuntar.addEventListener("dragleave", () => adjuntar.style.background = "");
     adjuntar.addEventListener("drop", e => {
@@ -327,10 +353,12 @@ document.addEventListener('DOMContentLoaded', function(){
         } else alert("Solo se aceptan archivos PDF");
     });
 
+    // Guardar PDF
     btnGuardar.addEventListener("click", function(){
         if(!archivoPDF) return alert("No hay archivo cargado");
         const formData = new FormData();
         formData.append("archivoPDF", archivoPDF);
+        if(archivoSeleccionado) formData.append("original", archivoSeleccionado);
         fetch("guardar_pdf.asp", { method: "POST", body: formData })
             .then(res => res.text())
             .then(resp => { alert(resp); location.reload(); })
