@@ -13,6 +13,7 @@ diasAlFeriado = 30
 
 NombreApellido = Session("nombre")
 Admin = Session("admin")
+
 Dim carpetaUploads, sistemaArchivos, carpeta, archivo
 Dim usuarioPrincipal, TotalPendientes, TotalFirmados
 Dim listaPDFs, listaFirmados
@@ -25,6 +26,7 @@ listaPDFs = ""
 listaFirmados = ""
 Set sistemaArchivos = Server.CreateObject("Scripting.FileSystemObject")
 
+' === Usuarios de la empresa para el selector (solo admin) ===
 Set comandoSQL = Server.CreateObject("ADODB.Command")
 Set comandoSQL.ActiveConnection = conn
 comandoSQL.CommandText = "UsuariosDeLaEmpresa"
@@ -33,7 +35,7 @@ comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar,
 Set usuariosEmpresaRS = comandoSQL.Execute()
 
 ' ============================================================
-' 🚀 LLAMADA A SP PARA PENDIENTES (R)
+' PENDIENTES (R)
 ' ============================================================
 Dim cmd, rs, palabrasPendientes, tmpListaE
 tmpListaE = ""
@@ -46,18 +48,16 @@ cmd.Parameters.Append cmd.CreateParameter("@Enviado_Recibido", tipoVarChar, para
 Set rs = cmd.Execute()
 
 If Not rs.EOF Then
-    If rs("cantidad") <> 0 Then
-        Do While Not rs.EOF
-            If Len(Trim(rs("Nombre_Path"))) > 0 Then
-                If tmpListaE = "" Then
-                    tmpListaE = rs("Nombre_Path")
-                Else
-                    tmpListaE = tmpListaE & "," & rs("Nombre_Path")
-                End If
+    Do While Not rs.EOF
+        If Len(Trim(rs("Nombre_Path"))) > 0 Then
+            If tmpListaE = "" Then
+                tmpListaE = rs("Nombre_Path")
+            Else
+                tmpListaE = tmpListaE & "," & rs("Nombre_Path")
             End If
-            rs.MoveNext
-        Loop
-    End If
+        End If
+        rs.MoveNext
+    Loop
 End If
 
 If tmpListaE <> "" Then
@@ -66,11 +66,14 @@ Else
     palabrasPendientes = Array()
 End If
 
-Set rs = Nothing
+If Not rs Is Nothing Then
+    If Not rs.State = 0 Then rs.Close
+    Set rs = Nothing
+End If
 Set cmd = Nothing
 
 ' ============================================================
-' 🚀 LLAMADA A SP PARA FIRMADOS (E)
+' FIRMADOS (E)
 ' ============================================================
 Dim cmd2, rs2, palabrasFirmados, tmpListaR
 tmpListaR = ""
@@ -83,18 +86,16 @@ cmd2.Parameters.Append cmd2.CreateParameter("@Enviado_Recibido", tipoVarChar, pa
 Set rs2 = cmd2.Execute()
 
 If Not rs2.EOF Then
-    If rs2("cantidad") <> 0 Then
-        Do While Not rs2.EOF
-            If Len(Trim(rs2("Nombre_Path"))) > 0 Then
-                If tmpListaR = "" Then
-                    tmpListaR = rs2("Nombre_Path")
-                Else
-                    tmpListaR = tmpListaR & "," & rs2("Nombre_Path")
-                End If
+    Do While Not rs2.EOF
+        If Len(Trim(rs2("Nombre_Path"))) > 0 Then
+            If tmpListaR = "" Then
+                tmpListaR = rs2("Nombre_Path")
+            Else
+                tmpListaR = tmpListaR & "," & rs2("Nombre_Path")
             End If
-            rs2.MoveNext
-        Loop
-    End If
+        End If
+        rs2.MoveNext
+    Loop
 End If
 
 If tmpListaR <> "" Then
@@ -103,18 +104,23 @@ Else
     palabrasFirmados = Array()
 End If
 
-Set rs2 = Nothing
+If Not rs2 Is Nothing Then
+    If Not rs2.State = 0 Then rs2.Close
+    Set rs2 = Nothing
+End If
 Set cmd2 = Nothing
 
 ' ============================================================
-' 📂 RECORRIDO DE ARCHIVOS LOCALES
+' ARCHIVOS LOCALES
 ' ============================================================
 If sistemaArchivos.FolderExists(carpetaUploads) Then
     Set carpeta = sistemaArchivos.GetFolder(carpetaUploads)
 
+    ' PENDIENTES
+    Dim palabra
     For Each archivo In carpeta.Files
         If LCase(sistemaArchivos.GetExtensionName(archivo.Name)) = "pdf" Then
-            Dim nombreArchivo, coincide, palabra
+            Dim nombreArchivo, coincide
             nombreArchivo = LCase(archivo.Name)
             coincide = False
 
@@ -127,14 +133,20 @@ If sistemaArchivos.FolderExists(carpetaUploads) Then
 
             If coincide Then
                 TotalPendientes = TotalPendientes + 1
-                listaPDFs = listaPDFs & "<li><a href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a></li>"
+                listaPDFs = listaPDFs & "<li><a href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a>"
+                If Admin <> "S" Then
+                    listaPDFs = listaPDFs & " <button class='btnFirmar' data-archivo='" & archivo.Name & "'>Firmar</button>"
+                End If
+                listaPDFs = listaPDFs & "</li>"
             End If
         End If
     Next
 
+    ' FIRMADOS
+    Dim palabra2
     For Each archivo In carpeta.Files
         If LCase(sistemaArchivos.GetExtensionName(archivo.Name)) = "pdf" Then
-            Dim nombreArchivo2, coincide2, palabra2
+            Dim nombreArchivo2, coincide2
             nombreArchivo2 = LCase(archivo.Name)
             coincide2 = False
 
@@ -211,20 +223,19 @@ End If
     </aside>
     <main class="contenido-principal">
         <div class="tabs" role="tablist">
-            <%if admin <> "S" then%>
+            <% If Admin <> "S" Then %>
                 <button class="tab activo" data-target="pendientes" type="button">
                     Pendientes <span class="badge"><%=TotalPendientes%></span>
                 </button>
-
-            <%end if%>
+            <% End If %>
             <button class="tab" data-target="firmados" type="button">
                 Firmados <span class="badge"><%=TotalFirmados%></span>
             </button>
-            <%if Admin = "S" then%>
+            <% If Admin = "S" Then %>
                 <button class="tab" data-target="cargar" type="button">Cargar PDF</button>
-            <%else%>
+            <% Else %>
                 <button class="tab" data-target="cargar" type="button">Firmar PDF</button>
-            <%end if%> 
+            <% End If %>
         </div>
 
         <div class="lista-tarjetas">
@@ -236,12 +247,12 @@ End If
             </div>
         </div>
 
-        <%if Admin = "S" then%>
+        <% If Admin = "S" Then %>
         <div id="selectorUsuarioBox">
             <label for="selectorUsuario"><strong>Seleccioná destinatario:</strong></label><br>
             <select id="selectorUsuario">
                 <option value="">-- Seleccione un destinatario --</option>
-                <% 
+                <%
                 If Not usuariosEmpresaRS.EOF Then
                     Do While Not usuariosEmpresaRS.EOF
                         Response.Write "<option value='" & usuariosEmpresaRS("usuario") & "'>" & usuariosEmpresaRS("NombreApellido") & "</option>"
@@ -254,8 +265,8 @@ End If
             </select>
             <button id="btnSeleccionOK" type="button">OK</button>
         </div>
-        <%end if%>
-    </main> 
+        <% End If %>
+    </main>
 
     <div id="visorPDF"></div>
     <div id="adjuntar" style="display:none;">Soltá tu PDF acá</div>
@@ -263,141 +274,182 @@ End If
 </div>
 
 <%
-Set carpeta = Nothing
-Set sistemaArchivos = Nothing
-conn.Close
-Set conn = Nothing
+' Limpieza de objetos de servidor
+On Error Resume Next
+If Not usuariosEmpresaRS Is Nothing Then
+    If Not usuariosEmpresaRS.State = 0 Then usuariosEmpresaRS.Close
+    Set usuariosEmpresaRS = Nothing
+End If
+If Not carpeta Is Nothing Then Set carpeta = Nothing
+If Not sistemaArchivos Is Nothing Then Set sistemaArchivos = Nothing
+If Not conn Is Nothing Then
+    If Not conn.State = 0 Then conn.Close
+    Set conn = Nothing
+End If
+On Error GoTo 0
 %>
 
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-    const tabs = Array.from(document.querySelectorAll('.tab') || []);
-    const visor = document.getElementById("visorPDF");
-    const listaPDFs = document.getElementById("listaPDFs");
-    const listaFirmados = document.getElementById("listaFirmados");
-    const adjuntar = document.getElementById("adjuntar");
-    const btnGuardar = document.getElementById("btnGuardar");
-    const selectorBox = document.getElementById("selectorUsuarioBox");
-    const selector = document.getElementById("selectorUsuario");
-    const btnOK = document.getElementById("btnSeleccionOK");
-    const botonesFirmar = Array.from(document.querySelectorAll('.btnFirmar') || []);
+
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel) || []);
+
+    const tabs = $$('.tab');
+    const visor = $('#visorPDF');
+    const listaPDFs = $('#listaPDFs');
+    const listaFirmados = $('#listaFirmados');
+    const adjuntar = $('#adjuntar');
+    const btnGuardar = $('#btnGuardar');
+    const selectorBox = $('#selectorUsuarioBox');
+    const selector = $('#selectorUsuario');
+    const btnOK = $('#btnSeleccionOK');
+    const botonesFirmar = $$('.btnFirmar');
+
+    const esAdmin = '<%= Admin %>' === 'S';
+    const usuarioPrincipal = '<%= usuarioPrincipal %>';
 
     let archivoPDF = null;
     let archivoSeleccionado = null;
     let destinatario = null;
 
-    // SAFELY determine admin flag (server injects Admin)
-    const esAdmin = '<%= Admin %>' === 'S';
+    if(!esAdmin){
+        destinatario = usuarioPrincipal; // quien firma
+    }
 
-    function activarTab(target) {
-        // remove activo from any tab buttons that exist
-        tabs.forEach(t => {
-            if(t && t.classList) t.classList.remove("activo");
-        });
+    function safeHide(el){ if(el) el.style.display = 'none'; }
+    function safeShow(el, disp){ if(el) el.style.display = disp || 'block'; }
 
-        // add activo to the matching tab button (if exists)
-        const activeBtn = document.querySelector(`.tab[data-target="${target}"]`);
-        if(activeBtn && activeBtn.classList) activeBtn.classList.add("activo");
+    function activarTab(target){
+        // quitar "activo"
+        tabs.forEach(t => t && t.classList && t.classList.remove('activo'));
+        // marcar activo si existe
+        const activeBtn = $(`.tab[data-target="${target}"]`);
+        if(activeBtn && activeBtn.classList) activeBtn.classList.add('activo');
 
-        if(visor) visor.style.display = "none";
-        if(listaPDFs) listaPDFs.style.display = "none";
-        if(listaFirmados) listaFirmados.style.display = "none";
-        if(adjuntar) adjuntar.style.display = "none";
-        if(btnGuardar) btnGuardar.style.display = "none";
-        if(selectorBox) selectorBox.style.display = "none";
+        // ocultar todo
+        safeHide(visor);
+        safeHide(listaPDFs);
+        safeHide(listaFirmados);
+        safeHide(adjuntar);
+        safeHide(btnGuardar);
+        safeHide(selectorBox);
 
-        if(target === "pendientes" && listaPDFs) listaPDFs.style.display = "block";
-        if(target === "firmados" && listaFirmados) listaFirmados.style.display = "block";
-
-        if(target === "cargar") {
-            if(esAdmin) {
-                if(selectorBox) selectorBox.style.display = "block";
+        // mostrar según target
+        if(target === 'pendientes' && listaPDFs) safeShow(listaPDFs);
+        if(target === 'firmados' && listaFirmados) safeShow(listaFirmados);
+        if(target === 'cargar'){
+            if(esAdmin){
+                safeShow(selectorBox);
             } else {
-                if(adjuntar) adjuntar.style.display = "block";
-                if(visor) visor.style.display = "flex";
+                safeShow(adjuntar);
+                safeShow(visor, 'flex');
             }
         }
     }
 
-    // initial tab
-    activarTab("pendientes");
+    // Tab inicial seguro:
+    // - Si es Admin, "pendientes" no existe. Elegimos "firmados".
+    // - Si no es Admin, sí existe "pendientes".
+    activarTab(esAdmin ? 'firmados' : 'pendientes');
 
-    // attach click listeners to tab buttons (if buttons exist)
+    // listeners tabs
     tabs.forEach(tab => {
-        if(tab) tab.addEventListener("click", function(){ activarTab(tab.dataset.target); });
+        if(!tab) return;
+        tab.addEventListener('click', () => activarTab(tab.dataset.target));
     });
 
-    // 💾 Guardar destinatario (solo admin) - only if elements exist
-    if(esAdmin && btnOK && selector && selectorBox && adjuntar && visor) {
-        btnOK.addEventListener("click", function(){
+    // Admin: seleccionar destinatario
+    if(esAdmin && btnOK && selector){
+        btnOK.addEventListener('click', function(){
             const val = selector.value;
             if(!val){
-                alert("Debes seleccionar un destinatario antes de continuar.");
+                alert('Seleccioná un destinatario');
                 return;
             }
             destinatario = val;
-            // keep existing behavior: save destinatario in session
-            fetch("guardar_destinatario.asp?user=" + encodeURIComponent(val))
-                .then(res => res.text())
-                .then(txt => alert("Documento del destinatario guardado: " + val))
 
-
-            selectorBox.style.display = "none";
-            adjuntar.style.display = "block";
-            visor.style.display = "flex";
+            fetch('guardar_destinatario.asp?user=' + encodeURIComponent(val))
+                .then(r => r.text())
+                .then(() => {
+                    safeHide(selectorBox);
+                    safeShow(adjuntar);
+                    safeShow(visor, 'flex');
+                })
+                .catch(() => {
+                    alert('No se pudo guardar el destinatario');
+                });
         });
-    } else {
-        // no-admin: hardcode destinatario
-        destinatario = "skreka";
     }
 
-    // 🔹 Evento firmar (no admin): attach only if botonesFirmar exist
-    if(botonesFirmar && botonesFirmar.length > 0) {
+    // No admin: evento firmar
+    if(botonesFirmar.length){
         botonesFirmar.forEach(b => {
             if(!b) return;
             b.addEventListener('click', function(e){
                 archivoSeleccionado = e.currentTarget.dataset.archivo || null;
-                alert("Vas a firmar el archivo: " + (archivoSeleccionado || "(sin nombre)"));
-                activarTab('cargar');
+
+                // Guardar en Session el nombre del archivo a firmar
+                fetch('guardar_destinatario.asp?file=' + encodeURIComponent(archivoSeleccionado))
+                    .then(r => r.text())
+                    .then(() => {
+                        alert('Vas a firmar: ' + archivoSeleccionado);
+                        activarTab('cargar');
+                    })
+                    .catch(() => alert('No se pudo preparar la firma'));
             });
         });
     }
 
-    // Drag & Drop PDF - guard with element checks
-    if(adjuntar) {
-        adjuntar.addEventListener("dragover", function(e){ e.preventDefault(); if(adjuntar) adjuntar.style.background = "#eef"; });
-        adjuntar.addEventListener("dragleave", function(){ if(adjuntar) adjuntar.style.background = ""; });
-        adjuntar.addEventListener("drop", function(e){
+    // Drag & drop
+    if(adjuntar){
+        adjuntar.addEventListener('dragover', function(e){
             e.preventDefault();
-            if(adjuntar) adjuntar.style.background = "";
-            const file = e.dataTransfer.files[0];
-            if(file && file.type === "application/pdf"){
+            adjuntar.style.background = '#eef';
+        });
+        adjuntar.addEventListener('dragleave', function(){
+            adjuntar.style.background = '';
+        });
+        adjuntar.addEventListener('drop', function(e){
+            e.preventDefault();
+            adjuntar.style.background = '';
+
+            const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if(file && file.type === 'application/pdf'){
                 archivoPDF = file;
                 const url = URL.createObjectURL(file);
-                if(visor) visor.innerHTML = `<iframe src="${url}" width="100%" height="600px"></iframe>`;
-                if(visor) visor.style.display = "flex";
-                if(btnGuardar) btnGuardar.style.display = "inline-block";
+                if(visor){
+                    visor.innerHTML = `<iframe src="${url}" width="100%" height="600px"></iframe>`;
+                    safeShow(visor, 'flex');
+                }
+                safeShow(btnGuardar, 'inline-block');
             } else {
-                alert("Solo se aceptan archivos PDF");
+                alert('Solo se aceptan archivos PDF');
             }
         });
     }
 
-    // Guardar PDF - safe check
-    if(btnGuardar) {
-        btnGuardar.addEventListener("click", function(){
-            if(!archivoPDF) return alert("No hay archivo cargado");
+    // Guardar
+    if(btnGuardar){
+        btnGuardar.addEventListener('click', function(){
+            if(!archivoPDF){
+                alert('No hay archivo cargado');
+                return;
+            }
             const formData = new FormData();
-            formData.append("archivoPDF", archivoPDF);
-            if(archivoSeleccionado) formData.append("original", archivoSeleccionado);
-            formData.append("destinatario", destinatario);
-            fetch("guardar_pdf.asp", { method: "POST", body: formData })
+            formData.append('archivoPDF', archivoPDF);
+            if(archivoSeleccionado) formData.append('original', archivoSeleccionado);
+            if(destinatario) formData.append('destinatario', destinatario);
+
+            fetch('guardar_pdf.asp', { method: 'POST', body: formData })
                 .then(res => res.text())
                 .then(resp => { alert(resp); location.reload(); })
-                .catch(err => alert("Error subiendo archivo: " + err));
+                .catch(err => alert('Error subiendo archivo: ' + err));
         });
     }
+
 });
 </script>
+
 </body>
 </html>
