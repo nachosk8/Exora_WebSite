@@ -213,12 +213,14 @@ End If
             </ul>
         </nav>
     </aside>
-
     <main class="contenido-principal">
         <div class="tabs" role="tablist">
-            <button class="tab activo" data-target="pendientes" type="button">
-                Pendientes <span class="badge"><%=TotalPendientes%></span>
-            </button>
+            <%if admin <> "S" then%>
+                <button class="tab activo" data-target="pendientes" type="button">
+                    Pendientes <span class="badge"><%=TotalPendientes%></span>
+                </button>
+
+            <%end if%>
             <button class="tab" data-target="firmados" type="button">
                 Firmados <span class="badge"><%=TotalFirmados%></span>
             </button>
@@ -260,7 +262,7 @@ End If
     </main> 
 
     <div id="visorPDF"></div>
-    <div id="adjuntar" style="display:none;">Arrastra y suelta un PDF aquí</div>
+    <div id="adjuntar" style="display:none;">Soltá tu PDF acá</div>
     <button id="btnGuardar" style="display:none;">Guardar PDF</button>
 </div>
 
@@ -341,8 +343,8 @@ document.addEventListener('DOMContentLoaded', function(){
             // keep existing behavior: save destinatario in session
             fetch("guardar_destinatario.asp?user=" + encodeURIComponent(val))
                 .then(res => res.text())
-                .then(txt => alert("Destinatario guardado en sesión: " + val))
-                .catch(err => alert("Error al guardar destinatario: " + err));
+                .then(txt => alert("Documento del destinatario guardado: " + val))
+
 
             selectorBox.style.display = "none";
             adjuntar.style.display = "block";
