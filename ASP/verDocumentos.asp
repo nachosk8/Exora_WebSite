@@ -127,11 +127,7 @@ If sistemaArchivos.FolderExists(carpetaUploads) Then
 
             If coincide Then
                 TotalPendientes = TotalPendientes + 1
-                listaPDFs = listaPDFs & "<li><a href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a>"
-                If Admin <> "S" Then
-                    listaPDFs = listaPDFs & " <button class='btnFirmar' data-archivo='" & archivo.Name & "'>Firmar</button>"
-                End If
-                listaPDFs = listaPDFs & "</li>"
+                listaPDFs = listaPDFs & "<li><a href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a></li>"
             End If
         End If
     Next
