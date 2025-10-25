@@ -42,6 +42,7 @@ tmpListaE = ""
 Set cmd = Server.CreateObject("ADODB.Command")
 Set cmd.ActiveConnection = conn
 cmd.CommandText = "Get_Archivos"
+cmd.CommandType = tipoProcedcimientoAlmacenado ' INTENCIONAL: corregido más abajo si falla
 cmd.CommandType = tipoProcedimientoAlmacenado
 cmd.Parameters.Append cmd.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
 cmd.Parameters.Append cmd.CreateParameter("@Enviado_Recibido", tipoVarChar, parametroEntrada, 1, "R")
@@ -133,11 +134,13 @@ If sistemaArchivos.FolderExists(carpetaUploads) Then
 
             If coincide Then
                 TotalPendientes = TotalPendientes + 1
-                listaPDFs = listaPDFs & "<li><a href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a>"
+                listaPDFs = listaPDFs & "<li><div class='pdf-item'>" & _
+                "<span class='pdf-icon'>📄</span>" & _
+                "<a class='pdf-link' href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a>"
                 If Admin <> "S" Then
                     listaPDFs = listaPDFs & " <button class='btnFirmar' data-archivo='" & archivo.Name & "'>Firmar</button>"
                 End If
-                listaPDFs = listaPDFs & "</li>"
+                listaPDFs = listaPDFs & "</div></li>"
             End If
         End If
     Next
@@ -159,7 +162,10 @@ If sistemaArchivos.FolderExists(carpetaUploads) Then
 
             If coincide2 Then
                 TotalFirmados = TotalFirmados + 1
-                listaFirmados = listaFirmados & "<li><a href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a></li>"
+                listaFirmados = listaFirmados & "<li><div class='pdf-item'>" & _
+                "<span class='pdf-icon'>📄</span>" & _
+                "<a class='pdf-link' href='../Uploads/" & archivo.Name & "' target='_blank'>" & archivo.Name & "</a>" & _
+                "</div></li>"
             End If
         End If
     Next
@@ -266,7 +272,7 @@ End If
             <button id="btnSeleccionOK" type="button">OK</button>
         </div>
         <% End If %>
-    </main>
+    </main> 
 
     <div id="visorPDF"></div>
     <div id="adjuntar" style="display:none;">Soltá tu PDF acá</div>
@@ -320,14 +326,17 @@ document.addEventListener('DOMContentLoaded', function(){
     function safeHide(el){ if(el) el.style.display = 'none'; }
     function safeShow(el, disp){ if(el) el.style.display = disp || 'block'; }
 
-    function activarTab(target){
-        // quitar "activo"
-        tabs.forEach(t => t && t.classList && t.classList.remove('activo'));
-        // marcar activo si existe
-        const activeBtn = $(`.tab[data-target="${target}"]`);
-        if(activeBtn && activeBtn.classList) activeBtn.classList.add('activo');
+    // Ocultar pestaña "cargar/firmar" para no-admin al inicio
+    let tabCargar = document.querySelector('.tab[data-target="cargar"]');
+    if(!esAdmin && tabCargar){
+        tabCargar.style.display = "none";
+    }
 
-        // ocultar todo
+    function activarTab(target){
+        tabs.forEach(t => { if(t && t.classList) t.classList.remove("activo"); });
+        const activeBtn = document.querySelector(`.tab[data-target="${target}"]`);
+        if(activeBtn && activeBtn.classList) activeBtn.classList.add("activo");
+
         safeHide(visor);
         safeHide(listaPDFs);
         safeHide(listaFirmados);
@@ -335,51 +344,53 @@ document.addEventListener('DOMContentLoaded', function(){
         safeHide(btnGuardar);
         safeHide(selectorBox);
 
-        // mostrar según target
-        if(target === 'pendientes' && listaPDFs) safeShow(listaPDFs);
-        if(target === 'firmados' && listaFirmados) safeShow(listaFirmados);
-        if(target === 'cargar'){
+        if(target === "pendientes" && listaPDFs) safeShow(listaPDFs);
+        if(target === "firmados" && listaFirmados) safeShow(listaFirmados);
+
+        if(target === "cargar"){
             if(esAdmin){
                 safeShow(selectorBox);
             } else {
                 safeShow(adjuntar);
-                safeShow(visor, 'flex');
+                safeShow(visor, "flex");
             }
+        }
+
+        // Si NO admin y navega fuera de "cargar", vuelve a ocultarse la pestaña
+        if(!esAdmin && tabCargar && target !== "cargar"){
+            tabCargar.style.display = "none";
         }
     }
 
-    // Tab inicial seguro:
-    // - Si es Admin, "pendientes" no existe. Elegimos "firmados".
-    // - Si no es Admin, sí existe "pendientes".
-    activarTab(esAdmin ? 'firmados' : 'pendientes');
+    // Tab inicial
+    activarTab(esAdmin ? "firmados" : "pendientes");
 
-    // listeners tabs
+    // Click en tabs
     tabs.forEach(tab => {
-        if(!tab) return;
-        tab.addEventListener('click', () => activarTab(tab.dataset.target));
+        if(tab) tab.addEventListener("click", function(){ activarTab(tab.dataset.target); });
     });
 
     // Admin: seleccionar destinatario
     if(esAdmin && btnOK && selector){
-        btnOK.addEventListener('click', function(){
+        btnOK.addEventListener("click", function(){
             const val = selector.value;
             if(!val){
-                alert('Seleccioná un destinatario');
+                alert("Seleccioná un destinatario");
                 return;
             }
             destinatario = val;
 
-            fetch('guardar_destinatario.asp?user=' + encodeURIComponent(val))
-                .then(r => r.text())
+            fetch("guardar_destinatario.asp?user=" + encodeURIComponent(val))
+                .then(res => res.text())
                 .then(() => {
                     safeHide(selectorBox);
                     safeShow(adjuntar);
-                    safeShow(visor, 'flex');
+                    safeShow(visor, "flex");
                 })
-                .catch(() => {
-                    alert('No se pudo guardar el destinatario');
-                });
+                .catch(() => alert("No se pudo guardar el destinatario"));
         });
+    } else {
+        destinatario = usuarioPrincipal;
     }
 
     // No admin: evento firmar
@@ -389,67 +400,69 @@ document.addEventListener('DOMContentLoaded', function(){
             b.addEventListener('click', function(e){
                 archivoSeleccionado = e.currentTarget.dataset.archivo || null;
 
+                if(!archivoSeleccionado){
+                    alert("Error al seleccionar archivo a firmar");
+                    return;
+                }
+
                 // Guardar en Session el nombre del archivo a firmar
-                fetch('guardar_destinatario.asp?file=' + encodeURIComponent(archivoSeleccionado))
+                fetch("guardar_destinatario.asp?file=" + encodeURIComponent(archivoSeleccionado))
                     .then(r => r.text())
                     .then(() => {
-                        alert('Vas a firmar: ' + archivoSeleccionado);
-                        activarTab('cargar');
+                        // Mostrar pestaña Firmar PDF recién ahora
+                        if(!esAdmin && tabCargar){
+                            tabCargar.style.display = "inline-block";
+                        }
+                        activarTab('cargar'); // Cambiar automáticamente a esa pestaña
                     })
-                    .catch(() => alert('No se pudo preparar la firma'));
+                    .catch(() => alert("No se pudo preparar la firma"));
             });
         });
     }
 
-    // Drag & drop
+    // Drag & Drop PDF
     if(adjuntar){
-        adjuntar.addEventListener('dragover', function(e){
+        adjuntar.addEventListener("dragover", function(e){ e.preventDefault(); adjuntar.style.background = "#eef"; });
+        adjuntar.addEventListener("dragleave", function(){ adjuntar.style.background = ""; });
+        adjuntar.addEventListener("drop", function(e){
             e.preventDefault();
-            adjuntar.style.background = '#eef';
-        });
-        adjuntar.addEventListener('dragleave', function(){
-            adjuntar.style.background = '';
-        });
-        adjuntar.addEventListener('drop', function(e){
-            e.preventDefault();
-            adjuntar.style.background = '';
+            adjuntar.style.background = "";
 
             const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-            if(file && file.type === 'application/pdf'){
+            if(file && file.type === "application/pdf"){
                 archivoPDF = file;
                 const url = URL.createObjectURL(file);
                 if(visor){
                     visor.innerHTML = `<iframe src="${url}" width="100%" height="600px"></iframe>`;
-                    safeShow(visor, 'flex');
+                    safeShow(visor, "flex");
                 }
-                safeShow(btnGuardar, 'inline-block');
+                safeShow(btnGuardar, "inline-block");
             } else {
-                alert('Solo se aceptan archivos PDF');
+                alert("Solo se aceptan archivos PDF");
             }
         });
     }
 
-    // Guardar
+    // Guardar PDF
     if(btnGuardar){
-        btnGuardar.addEventListener('click', function(){
+        btnGuardar.addEventListener("click", function(){
             if(!archivoPDF){
-                alert('No hay archivo cargado');
+                alert("No hay archivo cargado");
                 return;
             }
             const formData = new FormData();
-            formData.append('archivoPDF', archivoPDF);
-            if(archivoSeleccionado) formData.append('original', archivoSeleccionado);
-            if(destinatario) formData.append('destinatario', destinatario);
+            formData.append("archivoPDF", archivoPDF);
+            if(archivoSeleccionado) formData.append("original", archivoSeleccionado);
+            if(destinatario) formData.append("destinatario", destinatario);
 
-            fetch('guardar_pdf.asp', { method: 'POST', body: formData })
+            fetch("guardar_pdf.asp", { method: "POST", body: formData })
                 .then(res => res.text())
                 .then(resp => { alert(resp); location.reload(); })
-                .catch(err => alert('Error subiendo archivo: ' + err));
+                .catch(err => alert("Error subiendo archivo: " + err));
         });
     }
 
 });
 </script>
-
 </body>
 </html>
