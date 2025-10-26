@@ -104,11 +104,17 @@ diasAlFeriado = 30
                     <br><li><a href="http://localhost/Exora_WebSite/ASP/verDocumentos.asp">📄 DOCUMENTOS</a></li><br>
                     <li><a href="http://localhost/Exora_WebSite/ASP/calendario.asp">📅 LICENCIAS</a></li><br>
                     <% IF esAdmin = "S" then %>
+                    <li><a href="http://localhost/Exora_WebSite/ASP/altas_usuarios.asp">👤 ALTA DE USUARIOS</a></li><br>
+
                     <div class="agregar-anuncio">
                         <button type="button" id="btnAgregar">PUBLICAR</button>
+
                     </div>
+
                     <% end if %>
                 </ul>
+
+
             </nav>
         </aside>
 

@@ -1,11 +1,8 @@
 <%@ Language="VBScript" %>
 <%
-' --- valores dinámicos de ejemplo ---
-docsPorFirmar =2
-faltasPorAprobar = 0
-diasDeVacaciones = 14
-diasAlFeriado = 30
-CEO = "no"  'simulo ser empleado
+
+NombreApellido = Session("nombre")
+Admin = Session("admin")
 %>
 <!DOCTYPE html>
 <html lang="es">
@@ -18,7 +15,7 @@ CEO = "no"  'simulo ser empleado
 <body>
     <header class="barra-superior">
         <div class="usuario">
-             JUAN IGNACIO SKREKA IVANESEVIC
+             <%=NombreApellido%>
 
         </div>
         <div class="espacio"></div>
