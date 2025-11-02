@@ -73,11 +73,23 @@ comandoSQL.CommandType = tipoProcedimientoAlmacenado
 comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
 Set usuariosEmpresaRS = comandoSQL.Execute()
 
-' --- valores dinámicos de ejemplo ---
-docsPorFirmar = 2
-faltasPorAprobar = 0
+
+' Obtengo docs pendientes
+Dim palabrasPendientes, tmpListaE
+tmpListaE = ""
+Set cmd = Server.CreateObject("ADODB.Command")
+Set cmd.ActiveConnection = conn
+cmd.CommandText = "Get_Archivos"
+cmd.CommandType = tipoProcedcimientoAlmacenado ' INTENCIONAL: corregido más abajo si falla
+cmd.CommandType = tipoProcedimientoAlmacenado
+cmd.Parameters.Append cmd.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
+cmd.Parameters.Append cmd.CreateParameter("@Enviado_Recibido", tipoVarChar, parametroEntrada, 1, "R")
+Set rsdocsPend = cmd.Execute()
+
+docsPorFirmar = rsdocsPend("cantidad")
+
+
 diasDeVacaciones = 14
-diasAlFeriado = 30
 %>
 
 <!DOCTYPE html>
@@ -135,18 +147,6 @@ diasAlFeriado = 30
                 </a>
 
                 <% IF esAdmin <> "S" THEN %>
-                <a href="calendario.asp" class="acceso-a-otra-pag">
-                    <div class="tarjeta">
-                        <div class="lado-izquierdo">
-                            <div class="icono-tarjeta">📥</div>
-                            <div class="contenido-tarjeta">
-                                <div class="titulo-tarjeta">Faltas</div>
-                                <div class="subtitulo-tarjeta">Por aprobar</div>
-                            </div>
-                        </div>
-                        <div class="numero-tarjeta"><%= faltasPorAprobar %></div>
-                    </div>
-                </a>
 
                 <div class="tarjeta">
                     <div class="lado-izquierdo">

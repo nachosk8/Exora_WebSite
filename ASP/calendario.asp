@@ -33,6 +33,7 @@ If Request.ServerVariables("REQUEST_METHOD") = "POST" Then
             .Parameters.Append .CreateParameter("@licencia", 200, 1, 50, licenciaSel)
             .Parameters.Append .CreateParameter("@desde", 7, 1, , fechaDesde)
             .Parameters.Append .CreateParameter("@hasta", 7, 1, , fechaHasta)
+            .Parameters.Append .CreateParameter("@nombreApellido", 200, 1, 50, NombreApellido)
             .Execute
         End With
         Set cmdInsert = Nothing
@@ -69,7 +70,7 @@ End With
     <div class="usuario"><%=NombreApellido%></div>
     <div class="espacio"></div>
     <div class="deslogin">
-        <a class="link-deslog" href="http://localhost/Exora_WebSite/ASP/form.asp">Salir</a>
+        <a class="link-deslog" href="http://localhost/Exora_WebSite/ASP/login.asp">Salir</a>
     </div>
 </header>
 
