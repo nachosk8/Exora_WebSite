@@ -88,6 +88,8 @@ End With
     <section style="margin-left:260px; padding:25px; width:100%;">
         <h2>Solicitud de Licencia</h2>
 
+        <p id="msgError" style="color:red; font-weight:bold;"></p>
+
         <% If mensaje <> "" Then %>
             <p style="color:<%=colorMensaje%>; font-weight:bold;"><%=mensaje%></p>
         <% End If %>
@@ -100,8 +102,10 @@ End With
                 If Not rsLicencias.EOF Then
                     Do Until rsLicencias.EOF
                 %>
-                        <option value="<%=rsLicencias("Licencia")%>">
-                            <%=rsLicencias("Licencia")%>
+                        <option 
+                            value="<%=rsLicencias("Licencia")%>"
+                            data-disponible="<%=rsLicencias("CantidadDisponible")%>">
+                            <%=rsLicencias("Licencia")%> (<%=rsLicencias("CantidadDisponible")%>)
                         </option>
                 <%
                         rsLicencias.MoveNext
@@ -131,8 +135,44 @@ End With
 function mostrarCalendarios() {
     const tipo = document.getElementById("tipoLicencia").value;
     const seccion = document.getElementById("seccionFechas");
+    const msg = document.getElementById("msgError");
+    msg.textContent = "";
     seccion.style.display = (tipo !== "") ? "block" : "none";
 }
+
+document.getElementById("formLicencia").addEventListener("submit", function(e) {
+    const ddl = document.getElementById("tipoLicencia");
+    const opt = ddl.options[ddl.selectedIndex];
+    const tipo = ddl.value;
+    const desde = document.getElementById("fechaDesde").value;
+    const hasta = document.getElementById("fechaHasta").value;
+    const msg = document.getElementById("msgError");
+    msg.textContent = "";
+
+    if (tipo === "" || desde === "" || hasta === "") return;
+
+    // lee la cantidad disponible desde el atributo data-disponible del option seleccionado
+    const diasDisponibles = parseInt(opt.getAttribute("data-disponible"), 10) || 0;
+
+    // calcula días solicitados (inclusive)
+    const d1 = new Date(desde);
+    const d2 = new Date(hasta);
+    const diffMs = d2 - d1;
+    const diasSolicitados = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+
+    // validaciones básicas
+    if (isNaN(diasSolicitados) || diasSolicitados <= 0) {
+        e.preventDefault();
+        msg.textContent = "⚠️ Rango de fechas inválido.";
+        return;
+    }
+
+    // compara contra disponibles
+    if (diasSolicitados > diasDisponibles) {
+        e.preventDefault();
+        msg.textContent = "⚠️ No puedes pedir más de " + diasDisponibles + " días para '" + tipo + "'. (" + diasSolicitados + " solicitados)";
+    }
+});
 </script>
 
 </body>
