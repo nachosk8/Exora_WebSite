@@ -151,23 +151,30 @@ document.getElementById("formLicencia").addEventListener("submit", function(e) {
 
     if (tipo === "" || desde === "" || hasta === "") return;
 
-    // lee la cantidad disponible desde el atributo data-disponible del option seleccionado
     const diasDisponibles = parseInt(opt.getAttribute("data-disponible"), 10) || 0;
-
-    // calcula días solicitados (inclusive)
     const d1 = new Date(desde);
     const d2 = new Date(hasta);
+    const hoy = new Date();
+    hoy.setHours(0,0,0,0); // limpiar hora para comparar solo fechas
+
     const diffMs = d2 - d1;
     const diasSolicitados = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
 
-    // validaciones básicas
+    // validación de fechas inválidas
     if (isNaN(diasSolicitados) || diasSolicitados <= 0) {
         e.preventDefault();
         msg.textContent = "⚠️ Rango de fechas inválido.";
         return;
     }
 
-    // compara contra disponibles
+    // validación: no se pueden pedir licencias en el pasado
+    if (d1 < hoy || d2 < hoy) {
+        e.preventDefault();
+        msg.textContent = "⚠️ No puedes solicitar licencias en fechas anteriores a hoy.";
+        return;
+    }
+
+    // validación: no exceder días disponibles
     if (diasSolicitados > diasDisponibles) {
         e.preventDefault();
         msg.textContent = "⚠️ No puedes pedir más de " + diasDisponibles + " días para '" + tipo + "'. (" + diasSolicitados + " solicitados)";
