@@ -55,6 +55,19 @@ With cmd
     .Parameters.Append .CreateParameter("@usuario", 200, 1, 20, usuarioPrincipal)
     Set rsLicencias = .Execute()
 End With
+
+' --- NUEVO BLOQUE: obtener licencias solicitadas ---
+Dim cmdSolic, rsSolicitadas
+Set cmdSolic = Server.CreateObject("ADODB.Command")
+With cmdSolic
+    .ActiveConnection = conn
+    .CommandText = "obtener_licencias_solicitadas"
+    .CommandType = 4 ' Stored Procedure
+    .Parameters.Append .CreateParameter("@usuario", 200, 1, 20, usuarioPrincipal)
+    .Parameters.Append .CreateParameter("@admin", 200, 1, 1, Admin)
+    Set rsSolicitadas = .Execute()
+End With
+' ---------------------------------------------------
 %>
 
 <!DOCTYPE html>
@@ -64,6 +77,27 @@ End With
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Licencias</title>
     <link rel="stylesheet" href="../css/estilo_calendario.css">
+    <style>
+        table.tabla-licencias {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 30px;
+            font-family: Arial, sans-serif;
+        }
+        .tabla-licencias th {
+            background-color: #0078D7;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        .tabla-licencias td {
+            border-bottom: 1px solid #ccc;
+            padding: 8px 10px;
+        }
+        .tabla-licencias tr:hover {
+            background-color: #f1f5ff;
+        }
+    </style>
 </head>
 <body>
 <header class="barra-superior">
@@ -86,6 +120,7 @@ End With
     </aside>
 
     <section style="margin-left:260px; padding:25px; width:100%;">
+    <%if Admin <> "S" then%>
         <h2>Solicitud de Licencia</h2>
 
         <p id="msgError" style="color:red; font-weight:bold;"></p>
@@ -94,6 +129,7 @@ End With
             <p style="color:<%=colorMensaje%>; font-weight:bold;"><%=mensaje%></p>
         <% End If %>
 
+        <!-- formulario -->
         <form method="post" id="formLicencia" class="form-licencia">
             <label>Tipo de licencia:</label>
             <select name="tipoLicencia" id="tipoLicencia" onchange="mostrarCalendarios()">
@@ -128,6 +164,43 @@ End With
                 <button type="submit">Aceptar</button>
             </div>
         </form>
+        <%end if%>
+
+        <!-- tabla de licencias solicitadas -->
+        <%
+        If Not rsSolicitadas.EOF Then
+            Dim cantidad
+            cantidad = rsSolicitadas("cantidad")
+            If cantidad > 0 Then
+        %>
+                <h3 style="margin-top:40px;">Licencias solicitadas</h3>
+                <table class="tabla-licencias">
+                    <tr>
+                        <th>DNI</th>
+                        <th>Nombre y Apellido</th>
+                        <th>Tipo de Licencia</th>
+                        <th>Desde</th>
+                        <th>Hasta</th>
+                    </tr>
+                    <%
+                    Do Until rsSolicitadas.EOF
+                    %>
+                        <tr>
+                            <td><%=rsSolicitadas("usuario")%></td>
+                            <td><%=rsSolicitadas("nombreapellido")%></td>
+                            <td><%=rsSolicitadas("licencia")%></td>
+                            <td><%=FormatDateTime(rsSolicitadas("inicio"), 2)%></td>
+                            <td><%=FormatDateTime(rsSolicitadas("fin"), 2)%></td>
+                        </tr>
+                    <%
+                        rsSolicitadas.MoveNext
+                    Loop
+                    %>
+                </table>
+        <%
+            End If
+        End If
+        %>
     </section>
 </div>
 
@@ -155,26 +228,23 @@ document.getElementById("formLicencia").addEventListener("submit", function(e) {
     const d1 = new Date(desde);
     const d2 = new Date(hasta);
     const hoy = new Date();
-    hoy.setHours(0,0,0,0); // limpiar hora para comparar solo fechas
+    hoy.setHours(0,0,0,0);
 
     const diffMs = d2 - d1;
     const diasSolicitados = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
 
-    // validación de fechas inválidas
     if (isNaN(diasSolicitados) || diasSolicitados <= 0) {
         e.preventDefault();
         msg.textContent = "⚠️ Rango de fechas inválido.";
         return;
     }
 
-    // validación: no se pueden pedir licencias en el pasado
     if (d1 < hoy || d2 < hoy) {
         e.preventDefault();
         msg.textContent = "⚠️ No puedes solicitar licencias en fechas anteriores a hoy.";
         return;
     }
 
-    // validación: no exceder días disponibles
     if (diasSolicitados > diasDisponibles) {
         e.preventDefault();
         msg.textContent = "⚠️ No puedes pedir más de " + diasDisponibles + " días para '" + tipo + "'. (" + diasSolicitados + " solicitados)";
@@ -192,6 +262,11 @@ document.getElementById("formLicencia").addEventListener("submit", function(e) {
 If Not rsLicencias Is Nothing Then 
     If rsLicencias.State = 1 Then rsLicencias.Close
 End If
+If Not rsSolicitadas Is Nothing Then 
+    If rsSolicitadas.State = 1 Then rsSolicitadas.Close
+End If
 Set rsLicencias = Nothing
+Set rsSolicitadas = Nothing
 Set cmd = Nothing
+Set cmdSolic = Nothing
 %>
