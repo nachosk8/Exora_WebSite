@@ -92,6 +92,7 @@ End With
         .tabla-licencias td {
             border-bottom: 1px solid #ccc;
             padding: 8px 10px;
+            vertical-align: top;
         }
         .tabla-licencias tr:hover {
             background-color: #f1f5ff;
@@ -105,9 +106,66 @@ End With
             padding: 5px 8px;
             color: white;
         }
-        .estado.aceptado { background-color: #28a745; }   /* verde */
-        .estado.pendiente { background-color: #ffc107; color: #333; } /* amarillo */
-        .estado.rechazado { background-color: #dc3545; }  /* rojo */
+        .estado.aceptado { background-color: #28a745; }
+        .estado.pendiente { background-color: #ffc107; color: #333; }
+        .estado.rechazado { background-color: #dc3545; }
+
+        /* 🎛 Botones admin */
+        .acciones-admin {
+            text-align: center;
+            position: relative;
+        }
+        .btn-aprobar, .btn-rechazar {
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 6px 10px;
+            font-size: 16px;
+            margin: 0 3px;
+            color: white;
+            transition: 0.2s;
+        }
+        .btn-aprobar { background-color: #28a745; }
+        .btn-aprobar:hover { background-color: #1e7e34; }
+        .btn-rechazar { background-color: #dc3545; }
+        .btn-rechazar:hover { background-color: #b21f2d; }
+
+        /* Popup del motivo */
+        .motivo-rechazo {
+            display: none;
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px;
+            width: 220px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+        .motivo-rechazo textarea {
+            width: 100%;
+            height: 60px;
+            resize: none;
+            font-size: 13px;
+            padding: 4px;
+        }
+        .motivo-btns {
+            text-align: right;
+            margin-top: 6px;
+        }
+        .motivo-btns button {
+            font-size: 12px;
+            padding: 4px 8px;
+            margin-left: 4px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-aceptar { background-color: #28a745; color: white; }
+        .btn-cancelar { background-color: #ccc; color: black; }
     </style>
 </head>
 <body>
@@ -134,8 +192,6 @@ End With
     <% If Admin <> "S" Then %>
         <h2>Solicitud de Licencia</h2>
 
-        <p id="msgError" style="color:red; font-weight:bold;"></p>
-
         <% If mensaje <> "" Then %>
             <p style="color:<%=colorMensaje%>; font-weight:bold;"><%=mensaje%></p>
         <% End If %>
@@ -149,17 +205,16 @@ End With
                 If Not rsLicencias.EOF Then
                     Do Until rsLicencias.EOF
                 %>
-                        <option 
-                            value="<%=rsLicencias("Licencia")%>"
+                    <option value="<%=rsLicencias("Licencia")%>"
                             data-disponible="<%=rsLicencias("CantidadDisponible")%>">
-                            <%=rsLicencias("Licencia")%> (<%=rsLicencias("CantidadDisponible")%>)
-                        </option>
+                        <%=rsLicencias("Licencia")%> (<%=rsLicencias("CantidadDisponible")%>)
+                    </option>
                 <%
                         rsLicencias.MoveNext
                     Loop
                 Else
                 %>
-                        <option value="">(Sin licencias disponibles)</option>
+                    <option value="">(Sin licencias disponibles)</option>
                 <%
                 End If
                 %>
@@ -177,13 +232,10 @@ End With
         </form>
     <% End If %>
 
-    <!-- tabla de licencias solicitadas -->
-    <%
-    If Not rsSolicitadas.EOF Then
-        Dim cantidad
-        cantidad = rsSolicitadas("cantidad")
-        If cantidad > 0 Then
-    %>
+    <!-- tabla -->
+    <% If Not rsSolicitadas.EOF Then 
+        Dim cantidad : cantidad = rsSolicitadas("cantidad")
+        If cantidad > 0 Then %>
         <h3 style="margin-top:40px;">Licencias solicitadas</h3>
         <table class="tabla-licencias">
             <tr>
@@ -194,37 +246,47 @@ End With
                 <th>Hasta</th>
                 <th>Días Totales</th>
                 <th>Estado</th>
+                <% If Admin = "S" Then %><th>Acciones</th><% End If %>
             </tr>
-            <%
-            Do Until rsSolicitadas.EOF
+            <% Do Until rsSolicitadas.EOF
                 Dim estado, claseEstado
                 estado = Trim(UCase(rsSolicitadas("Estado")))
                 Select Case estado
-                    Case "ACEPTADO": claseEstado = "aceptado"
-                    Case "APROBADO": claseEstado = "aceptado" ' por si usás este sinónimo
+                    Case "ACEPTADO", "APROBADO": claseEstado = "aceptado"
                     Case "PENDIENTE": claseEstado = "pendiente"
                     Case "RECHAZADO": claseEstado = "rechazado"
                     Case Else: claseEstado = ""
                 End Select
             %>
-                <tr>
-                    <td><%=rsSolicitadas("usuario")%></td>
-                    <td><%=rsSolicitadas("nombreapellido")%></td>
-                    <td><%=rsSolicitadas("licencia")%></td>
-                    <td><%=FormatDateTime(rsSolicitadas("inicio"), 2)%></td>
-                    <td><%=FormatDateTime(rsSolicitadas("fin"), 2)%></td>
-                    <td style="text-align:center;"><%=rsSolicitadas("DiasTotales")%></td>
-                    <td class="estado <%=claseEstado%>"><%=rsSolicitadas("Estado")%></td>
-                </tr>
-            <%
-                rsSolicitadas.MoveNext
-            Loop
-            %>
+            <tr>
+                <td><%=rsSolicitadas("usuario")%></td>
+                <td><%=rsSolicitadas("nombreapellido")%></td>
+                <td><%=rsSolicitadas("licencia")%></td>
+                <td><%=FormatDateTime(rsSolicitadas("inicio"), 2)%></td>
+                <td><%=FormatDateTime(rsSolicitadas("fin"), 2)%></td>
+                <td style="text-align:center;"><%=rsSolicitadas("DiasTotales")%></td>
+                <td class="estado <%=claseEstado%>"><%=rsSolicitadas("Estado")%></td>
+
+                <% If Admin = "S" And estado = "PENDIENTE" Then %>
+                    <td class="acciones-admin">
+                        <button class="btn-aprobar" title="Aprobar">✔</button>
+                        <button class="btn-rechazar" title="Rechazar">✖</button>
+                        <div class="motivo-rechazo">
+                            <textarea placeholder="Motivo de rechazo..."></textarea>
+                            <div class="motivo-btns">
+                                <button class="btn-aceptar">Aceptar</button>
+                                <button class="btn-cancelar">Cancelar</button>
+                            </div>
+                        </div>
+                    </td>
+                <% ElseIf Admin = "S" Then %>
+                    <td></td>
+                <% End If %>
+            </tr>
+            <% rsSolicitadas.MoveNext : Loop %>
         </table>
-    <%
-        End If
-    End If
-    %>
+    <% End If
+    End If %>
     </section>
 </div>
 
@@ -232,65 +294,82 @@ End With
 function mostrarCalendarios() {
     const tipo = document.getElementById("tipoLicencia").value;
     const seccion = document.getElementById("seccionFechas");
-    const msg = document.getElementById("msgError");
-    msg.textContent = "";
     seccion.style.display = (tipo !== "") ? "block" : "none";
 }
 
-document.getElementById("formLicencia").addEventListener("submit", function(e) {
-    const ddl = document.getElementById("tipoLicencia");
-    const opt = ddl.options[ddl.selectedIndex];
-    const tipo = ddl.value;
-    const desde = document.getElementById("fechaDesde").value;
-    const hasta = document.getElementById("fechaHasta").value;
-    const msg = document.getElementById("msgError");
-    msg.textContent = "";
+document.addEventListener("DOMContentLoaded", function(){
+    document.querySelectorAll(".btn-rechazar").forEach(btn=>{
+        btn.addEventListener("click",e=>{
+            e.preventDefault();
+            const box = e.currentTarget.parentElement.querySelector(".motivo-rechazo");
+            box.style.display = box.style.display==="block"?"none":"block";
+        });
+    });
 
-    if (tipo === "" || desde === "" || hasta === "") return;
+    document.querySelectorAll(".btn-cancelar").forEach(btn=>{
+        btn.addEventListener("click",e=>{
+            e.preventDefault();
+            const box = e.currentTarget.closest(".motivo-rechazo");
+            box.querySelector("textarea").value="";
+            box.style.display="none";
+        });
+    });
 
-    const diasDisponibles = parseInt(opt.getAttribute("data-disponible"), 10) || 0;
-    const d1 = new Date(desde);
-    const d2 = new Date(hasta);
-    const hoy = new Date();
-    hoy.setHours(0,0,0,0);
+    document.querySelectorAll(".btn-aceptar").forEach(btn=>{
+        btn.addEventListener("click",e=>{
+            e.preventDefault();
+            const box=e.currentTarget.closest(".motivo-rechazo");
+            const motivo=box.querySelector("textarea").value.trim();
+            const fila=e.currentTarget.closest("tr");
+            enviarDecision(fila,"RECHAZADO",motivo);
+        });
+    });
 
-    const diffMs = d2 - d1;
-    const diasSolicitados = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
-
-    if (isNaN(diasSolicitados) || diasSolicitados <= 0) {
-        e.preventDefault();
-        msg.textContent = "⚠️ Rango de fechas inválido.";
-        return;
-    }
-
-    if (d1 < hoy || d2 < hoy) {
-        e.preventDefault();
-        msg.textContent = "⚠️ No puedes solicitar licencias en fechas anteriores a hoy.";
-        return;
-    }
-
-    if (diasSolicitados > diasDisponibles) {
-        e.preventDefault();
-        msg.textContent = "⚠️ No puedes pedir más de " + diasDisponibles + " días para '" + tipo + "'. (" + diasSolicitados + " solicitados)";
-    }
+    document.querySelectorAll(".btn-aprobar").forEach(btn=>{
+        btn.addEventListener("click",e=>{
+            e.preventDefault();
+            const fila=e.currentTarget.closest("tr");
+            enviarDecision(fila,"APROBADO","");
+        });
+    });
 });
+
+function enviarDecision(fila,estado,motivo){
+    const usuario=fila.children[0].innerText.trim();
+    const licencia=fila.children[2].innerText.trim();
+    const desde=fila.children[3].innerText.trim();
+    const hasta=fila.children[4].innerText.trim();
+    const dias=fila.children[5].innerText.trim();
+
+    fetch("aprobar_rechazar_licencia.asp",{
+        method:"POST",
+        body:new URLSearchParams({
+            usuario_solicitante:usuario,
+            licencia:licencia,
+            desde:desde,
+            hasta:hasta,
+            dias:dias,
+            motivo:motivo,
+            aprobacion:estado
+        })
+    })
+    .then(r=>r.json())
+    .then(data=>{
+        alert(data.msg);
+        if(data.ok) location.reload();
+    })
+    .catch(err=>alert("Error: "+err));
+}
 </script>
 
 </body>
 </html>
 
 <%
-' -------------------------------
-' LIMPIEZA FINAL
-' -------------------------------
-If Not rsLicencias Is Nothing Then 
-    If rsLicencias.State = 1 Then rsLicencias.Close
-End If
-If Not rsSolicitadas Is Nothing Then 
-    If rsSolicitadas.State = 1 Then rsSolicitadas.Close
-End If
-Set rsLicencias = Nothing
-Set rsSolicitadas = Nothing
-Set cmd = Nothing
-Set cmdSolic = Nothing
+If Not rsLicencias Is Nothing Then If rsLicencias.State=1 Then rsLicencias.Close
+If Not rsSolicitadas Is Nothing Then If rsSolicitadas.State=1 Then rsSolicitadas.Close
+Set rsLicencias=Nothing
+Set rsSolicitadas=Nothing
+Set cmd=Nothing
+Set cmdSolic=Nothing
 %>

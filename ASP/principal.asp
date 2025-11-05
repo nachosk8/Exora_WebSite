@@ -88,8 +88,34 @@ Set rsdocsPend = cmd.Execute()
 
 docsPorFirmar = rsdocsPend("cantidad")
 
+diasDeVacaciones = 0
 
-diasDeVacaciones = 14
+' === Obtener licencias disponibles ===
+Set cmd = Server.CreateObject("ADODB.Command")
+Set cmd.ActiveConnection = conn
+cmd.CommandText = "Traer_Licencias_Disponibles"
+cmd.CommandType = tipoProcedimientoAlmacenado
+cmd.Parameters.Append cmd.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
+Set rsLicPend = cmd.Execute()
+
+If Not rsLicPend Is Nothing Then
+    If Not rsLicPend.EOF Then
+        Do Until rsLicPend.EOF
+            If UCase(rsLicPend("Licencia")) = "VACACIONES" Then
+                diasDeVacaciones = rsLicPend("CantidadDisponible")
+                Exit Do ' salimos si ya la encontramos
+            End If
+            rsLicPend.MoveNext
+        Loop
+    End If
+    rsLicPend.Close
+End If
+Set rsLicPend = Nothing
+
+' Si querés ver el contenido devuelto
+
+
+
 %>
 
 <!DOCTYPE html>
@@ -147,7 +173,7 @@ diasDeVacaciones = 14
                 </a>
 
                 <% IF esAdmin <> "S" THEN %>
-
+                <a href="calendario.asp" class="acceso-a-otra-pag">
                 <div class="tarjeta">
                     <div class="lado-izquierdo">
                         <div class="icono-tarjeta">🏖️</div>
@@ -158,6 +184,7 @@ diasDeVacaciones = 14
                     </div>
                     <div class="numero-tarjeta"><%= diasDeVacaciones %></div>
                 </div>
+                </a>
                 <% END IF %>
             </div>
 
