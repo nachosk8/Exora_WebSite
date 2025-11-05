@@ -56,7 +56,7 @@ With cmd
     Set rsLicencias = .Execute()
 End With
 
-' --- NUEVO BLOQUE: obtener licencias solicitadas ---
+' --- Obtener licencias solicitadas ---
 Dim cmdSolic, rsSolicitadas
 Set cmdSolic = Server.CreateObject("ADODB.Command")
 With cmdSolic
@@ -67,7 +67,6 @@ With cmdSolic
     .Parameters.Append .CreateParameter("@admin", 200, 1, 1, Admin)
     Set rsSolicitadas = .Execute()
 End With
-' ---------------------------------------------------
 %>
 
 <!DOCTYPE html>
@@ -97,6 +96,18 @@ End With
         .tabla-licencias tr:hover {
             background-color: #f1f5ff;
         }
+
+        /* 🎨 Colores según estado */
+        .estado {
+            font-weight: bold;
+            text-align: center;
+            border-radius: 4px;
+            padding: 5px 8px;
+            color: white;
+        }
+        .estado.aceptado { background-color: #28a745; }   /* verde */
+        .estado.pendiente { background-color: #ffc107; color: #333; } /* amarillo */
+        .estado.rechazado { background-color: #dc3545; }  /* rojo */
     </style>
 </head>
 <body>
@@ -120,7 +131,7 @@ End With
     </aside>
 
     <section style="margin-left:260px; padding:25px; width:100%;">
-    <%if Admin <> "S" then%>
+    <% If Admin <> "S" Then %>
         <h2>Solicitud de Licencia</h2>
 
         <p id="msgError" style="color:red; font-weight:bold;"></p>
@@ -164,43 +175,56 @@ End With
                 <button type="submit">Aceptar</button>
             </div>
         </form>
-        <%end if%>
+    <% End If %>
 
-        <!-- tabla de licencias solicitadas -->
-        <%
-        If Not rsSolicitadas.EOF Then
-            Dim cantidad
-            cantidad = rsSolicitadas("cantidad")
-            If cantidad > 0 Then
-        %>
-                <h3 style="margin-top:40px;">Licencias solicitadas</h3>
-                <table class="tabla-licencias">
-                    <tr>
-                        <th>DNI</th>
-                        <th>Nombre y Apellido</th>
-                        <th>Tipo de Licencia</th>
-                        <th>Desde</th>
-                        <th>Hasta</th>
-                    </tr>
-                    <%
-                    Do Until rsSolicitadas.EOF
-                    %>
-                        <tr>
-                            <td><%=rsSolicitadas("usuario")%></td>
-                            <td><%=rsSolicitadas("nombreapellido")%></td>
-                            <td><%=rsSolicitadas("licencia")%></td>
-                            <td><%=FormatDateTime(rsSolicitadas("inicio"), 2)%></td>
-                            <td><%=FormatDateTime(rsSolicitadas("fin"), 2)%></td>
-                        </tr>
-                    <%
-                        rsSolicitadas.MoveNext
-                    Loop
-                    %>
-                </table>
-        <%
-            End If
+    <!-- tabla de licencias solicitadas -->
+    <%
+    If Not rsSolicitadas.EOF Then
+        Dim cantidad
+        cantidad = rsSolicitadas("cantidad")
+        If cantidad > 0 Then
+    %>
+        <h3 style="margin-top:40px;">Licencias solicitadas</h3>
+        <table class="tabla-licencias">
+            <tr>
+                <th>DNI</th>
+                <th>Nombre y Apellido</th>
+                <th>Tipo de Licencia</th>
+                <th>Desde</th>
+                <th>Hasta</th>
+                <th>Días Totales</th>
+                <th>Estado</th>
+            </tr>
+            <%
+            Do Until rsSolicitadas.EOF
+                Dim estado, claseEstado
+                estado = Trim(UCase(rsSolicitadas("Estado")))
+                Select Case estado
+                    Case "ACEPTADO": claseEstado = "aceptado"
+                    Case "APROBADO": claseEstado = "aceptado" ' por si usás este sinónimo
+                    Case "PENDIENTE": claseEstado = "pendiente"
+                    Case "RECHAZADO": claseEstado = "rechazado"
+                    Case Else: claseEstado = ""
+                End Select
+            %>
+                <tr>
+                    <td><%=rsSolicitadas("usuario")%></td>
+                    <td><%=rsSolicitadas("nombreapellido")%></td>
+                    <td><%=rsSolicitadas("licencia")%></td>
+                    <td><%=FormatDateTime(rsSolicitadas("inicio"), 2)%></td>
+                    <td><%=FormatDateTime(rsSolicitadas("fin"), 2)%></td>
+                    <td style="text-align:center;"><%=rsSolicitadas("DiasTotales")%></td>
+                    <td class="estado <%=claseEstado%>"><%=rsSolicitadas("Estado")%></td>
+                </tr>
+            <%
+                rsSolicitadas.MoveNext
+            Loop
+            %>
+        </table>
+    <%
         End If
-        %>
+    End If
+    %>
     </section>
 </div>
 
