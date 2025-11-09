@@ -83,7 +83,7 @@ End If
 
         <div class="input-group">
           <input type="password" name="contra" id="contra" required>
-          <label for="contra">Contra</label>
+          <label for="contra">Contraseña</label>
           <span class="toggle-password" onclick="mostrarContra()">ocultar/mostrar</span>
         </div>
 
@@ -98,15 +98,15 @@ End If
 
         <div class="input-group">
           <input type="text" name="newContra" id="nuevaContra" required>
-          <label for="nuevaContra">Nueva Contra</label>
+          <label for="nuevaContra">Nueva Contraseña</label>
         </div>
 
         <div class="input-group">
           <input type="text" name="confirmContra" id="confirmarContra" required>
-          <label for="confirmarContra">Confirmar Contra</label>
+          <label for="confirmarContra">Confirmar Contraseña</label>
         </div>
 
-        <button type="submit" class="login-btn">Actualizar Contra</button>
+        <button type="submit" class="login-btn">Actualizar Contraseña</button>
       </form>
 
       <script>
@@ -124,7 +124,7 @@ End If
             return false;
           }
           if(c1 !== c2){
-            alert("Las contras no coinciden.");
+            alert("Las contraseñas no coinciden.");
             return false;
           }
           return true;
@@ -133,7 +133,7 @@ End If
       <% End If %>
 
       <% If resultadoValidacion <> "" And resultadoValidacion = "N" Then %>
-        <script>alert("Usuario o contra incorrectos");</script>
+        <script>alert("Usuario o contraseña incorrectos");</script>
       <% End If %>
 
       <% If resultadoValidacion <> "" And resultadoValidacion = "S" Then
