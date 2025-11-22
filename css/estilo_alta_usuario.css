@@ -4,7 +4,7 @@
   --bg: #ececec;
 }
 
-/* Reset / base */
+
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -15,20 +15,20 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* Layout */
+
 .pantalla{display:flex; min-height:100vh}
 
-/* Sidebar */
+
 .menu-lateral {
   width:220px;
   background:var(--color--barra--izq);
   color:white;
   position:fixed;
-  top:50px;  /* 🔹 debajo de la barra */
+  top:50px;  
   left:0;
   bottom:0;
   padding:20px 12px;
-  z-index: 500;  /* 🔹 más chico que la barra */
+  z-index: 500;  
 }
 
 
@@ -77,7 +77,7 @@ body{
 .barra-superior {
     width: 100%;
     height: 50px;
-    background-color: #ffffff; /* azul, como tu menú lateral */
+    background-color: #ffffff; 
     color: rgb(0, 0, 0);
     display: flex;
     justify-content: flex-end;
@@ -87,10 +87,10 @@ body{
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1000; /* queda por encima */
+    z-index: 1000; 
 }
 
-/* Contenedor usuario ocupa 25% y lo manda a la derecha */
+
 .barra-superior .usuario {
     width: 25%;
     text-align: center;
@@ -121,7 +121,7 @@ body{
 
 
 
-/* Formulario crear usuario */
+
 .form-crear-usuario {
   max-width: 420px;
   background: #fff;

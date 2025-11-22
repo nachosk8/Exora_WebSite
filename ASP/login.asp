@@ -62,16 +62,16 @@ End If
 </head>
 <body>
   <div class="container">
-    <!-- Logo -->
+
     <div class="logo">
       <img src="../imagenes/logo.png" class="img-logo"/>
     </div>
 
-    <!-- Formulario login y cambio de contra -->
+
     <div class="login-container">
       <h2>EXORA | Empresas</h2>
 
-      <!-- Formulario login -->
+
       <form method="POST" id="formularioLogin">
         <input type="hidden" name="primeraVez" id="primeraVez" value="">
         <input type="hidden" name="accion" value="login">
@@ -91,7 +91,7 @@ End If
       </form>
 
       <% If resultadoValidacion <> "" And resultadoValidacion = "P" Then %>
-      <!-- Formulario cambio de contra -->
+
       <form method="POST" id="formularioCambioContra">
         <input type="hidden" name="accion" value="change">
         <input type="hidden" name="username" value="<%= Server.HTMLEncode(nombreUsuario) %>">
@@ -110,12 +110,12 @@ End If
       </form>
 
       <script>
-        // Deshabilitar formulario de login cuando se muestra cambio de contra
+
         document.getElementById("formularioLogin").querySelectorAll("input, button").forEach(function(el){
             el.disabled = true;
         });
 
-        // Validación del formulario de cambio de contra
+
         document.getElementById("formularioCambioContra").onsubmit = function(){
           var c1 = document.getElementById("nuevaContra").value;
           var c2 = document.getElementById("confirmarContra").value;

@@ -4,7 +4,7 @@
   --bg: #ececec;
 }
 
-/* Reset / base */
+
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -15,20 +15,20 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* Layout */
+
 .pantalla{display:flex; min-height:100vh}
 
-/* Sidebar */
+
 .menu-lateral {
   width:220px;
   background:var(--color--barra--izq);
   color:white;
   position:fixed;
-  top:50px;  /* 🔹 debajo de la barra */
+  top:50px;  
   left:0;
   bottom:0;
   padding:20px 12px;
-  z-index: 500;  /* 🔹 más chico que la barra */
+  z-index: 500;  
 }
 
 
@@ -56,14 +56,14 @@ body{
   transform: translateX(12px);
 }
 
-/* Main content area */
+
 .contenido-principal {
   margin-left:240px;
   padding:22px;
   flex:1;
   overflow-y:auto;
   min-height:100vh;
-  margin-top:50px; /* 🔹 deja espacio para la barra */
+  margin-top:50px; 
 }
 
 .img-logo{
@@ -86,7 +86,7 @@ body{
 .barra-superior {
     width: 100%;
     height: 50px;
-    background-color: #ffffff; /* azul, como tu menú lateral */
+    background-color: #ffffff; 
     color: rgb(0, 0, 0);
     display: flex;
     justify-content: flex-end;
@@ -96,10 +96,10 @@ body{
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1000; /* queda por encima */
+    z-index: 1000; 
 }
 
-/* Contenedor usuario ocupa 25% y lo manda a la derecha */
+
 .barra-superior .usuario {
     width: 25%;
     text-align: center;
@@ -128,8 +128,6 @@ body{
   width: 30px;
 }
 
-/* Tabs */
-/* Tabs */
 .tabs {
   display: flex;
   margin-bottom: 15px;
@@ -137,10 +135,10 @@ body{
 }
 
 .tab {
-  flex: none;               /* 🔹 ya no se estiran a todo el ancho */
+  flex: none;               
   background: #f9f9f9;
   border: 1px solid #ddd;
-  border-bottom: none;      /* 🔹 para que se vea unido al contenido */
+  border-bottom: none;      
   padding: 10px 18px;
   cursor: pointer;
   font-weight: bold;
@@ -151,7 +149,7 @@ body{
   margin-right: 4px;
 }
 
-/* 🔹 eliminamos estilo nativo de botones */
+
 .tab {
   appearance: none;
   -webkit-appearance: none;
@@ -162,7 +160,7 @@ body{
   background: #ffffff;
   color: var(--color--barra--izq);
   border: 1px solid #ddd;
-  border-bottom: 2px solid #ffffff; /* 🔹 se funde con el fondo */
+  border-bottom: 2px solid #ffffff; 
 }
 
 .badge {
@@ -173,7 +171,7 @@ body{
   font-size: 12px;
   margin-left: 6px;
 }
-/* ======== Listado de PDFs ======== */
+
 
 #listaPDFs li,
 #listaFirmados li {

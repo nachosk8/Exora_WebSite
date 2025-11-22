@@ -9,7 +9,7 @@ Const tipoProcedimientoAlmacenado = 4
 Dim usuarioPrincipal, comandoSQL, datosUsuario, nombreYApellido, esAdmin, empresa
 usuarioPrincipal = Session("usuario")
 
-' === Si se envió el formulario ===
+
 If Request.ServerVariables("REQUEST_METHOD") = "POST" Then
     Dim titulo, contenido, destinatario, cmd
     titulo = Trim(Request.Form("titulo"))
@@ -22,7 +22,7 @@ If Request.ServerVariables("REQUEST_METHOD") = "POST" Then
         cmd.CommandText = "CrearPublicacion"
         cmd.CommandType = tipoProcedimientoAlmacenado
 
-        ' ⚠️ Orden correcto de parámetros según tu SP:
+
         cmd.Parameters.Append cmd.CreateParameter("@remitente", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
         cmd.Parameters.Append cmd.CreateParameter("@destinatario", tipoVarChar, parametroEntrada, 500, destinatario)
         cmd.Parameters.Append cmd.CreateParameter("@titulo", tipoVarChar, parametroEntrada, 50, titulo)
@@ -31,14 +31,14 @@ If Request.ServerVariables("REQUEST_METHOD") = "POST" Then
         cmd.Execute
         Set cmd = Nothing
 
-        ' Redirigir para recargar la página y mostrar la nueva publicación
+
         Response.Redirect "principal.asp?ok=1"
     Else
         Response.Write "<script>alert('Faltan datos en el formulario');</script>"
     End If
 End If
 
-' === Obtener datos del usuario ===
+
 Set comandoSQL = Server.CreateObject("ADODB.Command")
 Set comandoSQL.ActiveConnection = conn
 comandoSQL.CommandText = "DatosDelUsuario"
@@ -56,7 +56,7 @@ datosUsuario.Close
 Set datosUsuario = Nothing
 Set comandoSQL = Nothing
 
-' === Obtener publicaciones ===
+
 Set comandoSQL = Server.CreateObject("ADODB.Command")
 Set comandoSQL.ActiveConnection = conn
 comandoSQL.CommandText = "VerPublicaciones"
@@ -65,7 +65,7 @@ comandoSQL.CursorType = 1
 comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
 Set publicacionesRS = comandoSQL.Execute()
 
-' === Obtener usuarios de la empresa ===
+
 Set comandoSQL = Server.CreateObject("ADODB.Command")
 Set comandoSQL.ActiveConnection = conn
 comandoSQL.CommandText = "UsuariosDeLaEmpresa"
@@ -74,13 +74,13 @@ comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar,
 Set usuariosEmpresaRS = comandoSQL.Execute()
 
 
-' Obtengo docs pendientes
+
 Dim palabrasPendientes, tmpListaE
 tmpListaE = ""
 Set cmd = Server.CreateObject("ADODB.Command")
 Set cmd.ActiveConnection = conn
 cmd.CommandText = "Get_Archivos"
-cmd.CommandType = tipoProcedcimientoAlmacenado ' INTENCIONAL: corregido más abajo si falla
+cmd.CommandType = tipoProcedcimientoAlmacenado 
 cmd.CommandType = tipoProcedimientoAlmacenado
 cmd.Parameters.Append cmd.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
 cmd.Parameters.Append cmd.CreateParameter("@Enviado_Recibido", tipoVarChar, parametroEntrada, 1, "R")
@@ -90,7 +90,7 @@ docsPorFirmar = rsdocsPend("cantidad")
 
 diasDeVacaciones = 0
 
-' === Obtener licencias disponibles ===
+
 Set cmd = Server.CreateObject("ADODB.Command")
 Set cmd.ActiveConnection = conn
 cmd.CommandText = "Traer_Licencias_Disponibles"
@@ -103,7 +103,7 @@ If Not rsLicPend Is Nothing Then
         Do Until rsLicPend.EOF
             If UCase(rsLicPend("Licencia")) = "VACACIONES" Then
                 diasDeVacaciones = rsLicPend("CantidadDisponible")
-                Exit Do ' salimos si ya la encontramos
+                Exit Do 
             End If
             rsLicPend.MoveNext
         Loop
@@ -112,7 +112,7 @@ If Not rsLicPend Is Nothing Then
 End If
 Set rsLicPend = Nothing
 
-' Si querés ver el contenido devuelto
+
 
 
 
@@ -134,12 +134,12 @@ Set rsLicPend = Nothing
     </header>
 
     <div class="pantalla">
-        <!-- Menú lateral -->
+
         <aside class="menu-lateral">
             <img src="../imagenes/logo.png" class="img-logo"/>
             <nav>
                 <ul>
-                    <br><li><a href="http://localhost/Exora_WebSite/ASP/verDocumentos.asp">📄 DOCUMENTOS</a></li><br>
+                    <br><li><a href="http://localhost/Exora_WebSite/ASP/verDocumentos.asp">📄 DOCUMENTACION</a></li><br>
                     <li><a href="http://localhost/Exora_WebSite/ASP/calendario.asp">📅 LICENCIAS</a></li><br>
                     <% IF esAdmin = "S" then %>
                     <li><a href="http://localhost/Exora_WebSite/ASP/altas_usuarios.asp">👤 ALTA DE USUARIOS</a></li><br>
@@ -156,7 +156,7 @@ Set rsLicPend = Nothing
             </nav>
         </aside>
 
-        <!-- Contenido principal -->
+
         <main class="contenido-principal">
             <div class="cuadros-estadisticas">
                 <a href="verDocumentos.asp" class="acceso-a-otra-pag">
@@ -164,7 +164,7 @@ Set rsLicPend = Nothing
                         <div class="lado-izquierdo">
                             <div class="icono-tarjeta">📄</div>
                             <div class="contenido-tarjeta">
-                                <div class="titulo-tarjeta">Documentos</div>
+                                <div class="titulo-tarjeta">Documentacion</div>
                                 <div class="subtitulo-tarjeta">Por firmar</div>
                             </div>
                         </div>
@@ -188,7 +188,7 @@ Set rsLicPend = Nothing
                 <% END IF %>
             </div>
 
-            <!-- Formulario de anuncio -->
+
             <div class="form-anuncio" id="formAnuncio" style="display:none; margin-top:10px;">
                 <form method="POST" action="principal.asp">
                     <input type="text" name="titulo" placeholder="Título del anuncio" style="width:100%; margin-bottom:6px; padding:6px;">
@@ -213,7 +213,7 @@ Set rsLicPend = Nothing
                 </form>
             </div>
 
-            <!-- Publicaciones -->
+
             <div id="contenedorPublicaciones">
                 <%
                 If Not publicacionesRS.EOF Then
@@ -244,13 +244,13 @@ Set rsLicPend = Nothing
     </div>
 
 <script>
-// Mostrar/ocultar formulario
+
 document.getElementById("btnAgregar").addEventListener("click", function() {
     let form = document.getElementById("formAnuncio");
     form.style.display = (form.style.display === "none") ? "block" : "none";
 });
 
-// Checkbox TODOS
+
 const chkTodos = document.getElementById("chkTodos");
 chkTodos.addEventListener("change", function() {
     const checkboxes = document.querySelectorAll("input[name='destinatario']");

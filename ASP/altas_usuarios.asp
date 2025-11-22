@@ -25,7 +25,7 @@ If Request.ServerVariables("REQUEST_METHOD") = "POST" Then
     With cmd
         .ActiveConnection = conn
         .CommandText = "Crear_Usuarios"
-        .CommandType = 4 ' Stored Procedure
+        .CommandType = 4 
 
         .Parameters.Append .CreateParameter("@Documento", 200, 1, 20, documento)
         .Parameters.Append .CreateParameter("@Nombre_Apellido", 200, 1, 20, nombreCompleto)
@@ -138,7 +138,7 @@ function validarFormulario() {
     return true;
 }
 
-// Bloquea teclas que no sean letras ni espacio
+
 function soloLetras(e) {
     const char = String.fromCharCode(e.keyCode);
     const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]$/;

@@ -1,14 +1,10 @@
 <%@ Language="VBScript" %>
 <%
 Option Explicit
-
-' ----------------------------
-' Conexión (pegada directamente)
-' ----------------------------
 Dim conn
 Set conn = Server.CreateObject("ADODB.Connection")
 
-' Capturamos errores para mostrar si falla la conexión
+
 On Error Resume Next
 conn.Open "Provider=SQLOLEDB;" & _
           "Data Source=DESKTOP-OOTIKMN\SQLEXPRESS;" & _
@@ -19,16 +15,13 @@ conn.Open "Provider=SQLOLEDB;" & _
 
 If Err.Number <> 0 Then
     Response.Write "❌ Error de conexión: " & Err.Description
-    ' Limpiamos y terminamos
+
     Err.Clear
     Set conn = Nothing
     Response.End
 End If
 On Error GoTo 0
 
-' ----------------------------
-' Variables y carpeta de guardado
-' ----------------------------
 Dim UploadDir, fso, objStream, FileName, path, cmd, usuarioPrincipal, usuarioDestino, Firmar
 UploadDir = "C:\PRASP\Exora_WebSite\Uploads"
 
@@ -46,15 +39,11 @@ If Not fso.FolderExists(UploadDir) Then
     End If
     On Error GoTo 0
 End If
-
-' ----------------------------
-' Recibo y guardo el archivo
-' ----------------------------
 If Request.TotalBytes > 0 Then
     Dim binData
     binData = Request.BinaryRead(Request.TotalBytes)
 
-    ' Generar nombre único
+
     Firmar = "S"
     usuarioDestino = Session("destinatario")
     usuarioPrincipal = Session("usuario")
@@ -68,20 +57,20 @@ If Request.TotalBytes > 0 Then
     end if 
     path = UploadDir & "\" & FileName
 
-    ' Guardar archivo binario
+
     On Error Resume Next
     Set objStream = Server.CreateObject("ADODB.Stream")
-    objStream.Type = 1 ' binary
+    objStream.Type = 1 
     objStream.Open
     objStream.Write binData
-    objStream.SaveToFile path, 2 ' 2 = overwrite
+    objStream.SaveToFile path, 2 
     objStream.Close
     Set objStream = Nothing
 
     If Err.Number <> 0 Then
         Response.Write "❌ Error guardando archivo: " & Err.Description
         Err.Clear
-        ' cerramos recursos
+        
         conn.Close
         Set conn = Nothing
         Set fso = Nothing
@@ -91,17 +80,14 @@ If Request.TotalBytes > 0 Then
     End If
     On Error GoTo 0
 
-    ' ----------------------------
-    ' Llamada al stored procedure
-    ' ----------------------------
     On Error Resume Next
     Set cmd = Server.CreateObject("ADODB.Command")
     Set cmd.ActiveConnection = conn
-    cmd.CommandType = 4 ' adCmdStoredProc
+    cmd.CommandType = 4 
     cmd.CommandText = "Carga_Firma_Archivos"
 
 
-    ' Parámetros hardcodeados por ahora (luego sustituir por Session / Request.Form)
+    
     cmd.Parameters.Append cmd.CreateParameter("@remitente", 200, 1, 20, usuarioPrincipal)    ' adVarChar = 200
     cmd.Parameters.Append cmd.CreateParameter("@destinatario", 200, 1, 20, usuarioDestino)
     cmd.Parameters.Append cmd.CreateParameter("@path", 200, 1, 50, FileName)
@@ -124,9 +110,6 @@ Else
     Response.Write "⚠️ No se recibió archivo."
 End If
 
-' ----------------------------
-' Limpieza final
-' ----------------------------
 If Not conn Is Nothing Then
     On Error Resume Next
     conn.Close

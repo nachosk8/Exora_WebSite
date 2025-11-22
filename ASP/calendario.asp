@@ -2,21 +2,18 @@
 <!--#include file="conexion.asp"-->
 <!--#include file="debug.asp"-->
 <%
-' -------------------------------
-' BLOQUE DE LÓGICA ASP
-' -------------------------------
 
 Dim NombreApellido, Admin, usuarioPrincipal
 NombreApellido = Session("nombre")
 Admin = Session("admin")
 usuarioPrincipal = Session("usuario")
 
-' --- Variables para mensajes ---
+
 Dim mensaje, colorMensaje
 mensaje = ""
 colorMensaje = "black"
 
-' --- Ejecutar inserción si se presionó Aceptar ---
+
 If Request.ServerVariables("REQUEST_METHOD") = "POST" Then
     Dim licenciaSel, fechaDesde, fechaHasta, cmdInsert
     licenciaSel = Trim(Request.Form("tipoLicencia"))
@@ -45,7 +42,7 @@ If Request.ServerVariables("REQUEST_METHOD") = "POST" Then
     End If
 End If
 
-' --- Cargar licencias disponibles ---
+
 Dim cmd, rsLicencias
 Set cmd = Server.CreateObject("ADODB.Command")
 With cmd
@@ -56,13 +53,13 @@ With cmd
     Set rsLicencias = .Execute()
 End With
 
-' --- Obtener licencias solicitadas ---
+
 Dim cmdSolic, rsSolicitadas
 Set cmdSolic = Server.CreateObject("ADODB.Command")
 With cmdSolic
     .ActiveConnection = conn
     .CommandText = "obtener_licencias_solicitadas"
-    .CommandType = 4 ' Stored Procedure
+    .CommandType = 4 
     .Parameters.Append .CreateParameter("@usuario", 200, 1, 20, usuarioPrincipal)
     .Parameters.Append .CreateParameter("@admin", 200, 1, 1, Admin)
     Set rsSolicitadas = .Execute()
@@ -98,7 +95,7 @@ End With
             background-color: #f1f5ff;
         }
 
-        /* 🎨 Colores según estado */
+        
         .estado {
             font-weight: bold;
             text-align: center;
@@ -110,7 +107,7 @@ End With
         .estado.pendiente { background-color: #ffc107; color: #333; }
         .estado.rechazado { background-color: #dc3545; }
 
-        /* 🎛 Botones admin */
+        
         .acciones-admin {
             text-align: center;
             position: relative;
@@ -130,7 +127,7 @@ End With
         .btn-rechazar { background-color: #dc3545; }
         .btn-rechazar:hover { background-color: #b21f2d; }
 
-        /* Popup del motivo */
+        
         .motivo-rechazo {
             display: none;
             position: absolute;
@@ -232,7 +229,7 @@ End With
         </form>
     <% End If %>
 
-    <!-- tabla -->
+    
     <% If Not rsSolicitadas.EOF Then 
         Dim cantidad : cantidad = rsSolicitadas("cantidad")
         If cantidad > 0 Then %>

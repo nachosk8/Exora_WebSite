@@ -26,7 +26,7 @@ listaPDFs = ""
 listaFirmados = ""
 Set sistemaArchivos = Server.CreateObject("Scripting.FileSystemObject")
 
-' === Usuarios de la empresa para el selector (solo admin) ===
+
 Set comandoSQL = Server.CreateObject("ADODB.Command")
 Set comandoSQL.ActiveConnection = conn
 comandoSQL.CommandText = "UsuariosDeLaEmpresa"
@@ -34,15 +34,12 @@ comandoSQL.CommandType = tipoProcedimientoAlmacenado
 comandoSQL.Parameters.Append comandoSQL.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
 Set usuariosEmpresaRS = comandoSQL.Execute()
 
-' ============================================================
-' PENDIENTES (R)
-' ============================================================
 Dim cmd, rs, palabrasPendientes, tmpListaE
 tmpListaE = ""
 Set cmd = Server.CreateObject("ADODB.Command")
 Set cmd.ActiveConnection = conn
 cmd.CommandText = "Get_Archivos"
-cmd.CommandType = tipoProcedcimientoAlmacenado ' INTENCIONAL: corregido más abajo si falla
+cmd.CommandType = tipoProcedcimientoAlmacenado 
 cmd.CommandType = tipoProcedimientoAlmacenado
 cmd.Parameters.Append cmd.CreateParameter("@usuario", tipoVarChar, parametroEntrada, 20, usuarioPrincipal)
 cmd.Parameters.Append cmd.CreateParameter("@Enviado_Recibido", tipoVarChar, parametroEntrada, 1, "R")
@@ -73,9 +70,6 @@ If Not rs Is Nothing Then
 End If
 Set cmd = Nothing
 
-' ============================================================
-' FIRMADOS (E)
-' ============================================================
 Dim cmd2, rs2, palabrasFirmados, tmpListaR
 tmpListaR = ""
 Set cmd2 = Server.CreateObject("ADODB.Command")
@@ -111,13 +105,10 @@ If Not rs2 Is Nothing Then
 End If
 Set cmd2 = Nothing
 
-' ============================================================
-' ARCHIVOS LOCALES
-' ============================================================
 If sistemaArchivos.FolderExists(carpetaUploads) Then
     Set carpeta = sistemaArchivos.GetFolder(carpetaUploads)
 
-    ' PENDIENTES
+
     Dim palabra
     For Each archivo In carpeta.Files
         If LCase(sistemaArchivos.GetExtensionName(archivo.Name)) = "pdf" Then
@@ -145,7 +136,7 @@ If sistemaArchivos.FolderExists(carpetaUploads) Then
         End If
     Next
 
-    ' FIRMADOS
+
     Dim palabra2
     For Each archivo In carpeta.Files
         If LCase(sistemaArchivos.GetExtensionName(archivo.Name)) = "pdf" Then
@@ -280,7 +271,7 @@ End If
 </div>
 
 <%
-' Limpieza de objetos de servidor
+
 On Error Resume Next
 If Not usuariosEmpresaRS Is Nothing Then
     If Not usuariosEmpresaRS.State = 0 Then usuariosEmpresaRS.Close
@@ -326,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function(){
     function safeHide(el){ if(el) el.style.display = 'none'; }
     function safeShow(el, disp){ if(el) el.style.display = disp || 'block'; }
 
-    // Ocultar pestaña "cargar/firmar" para no-admin al inicio
+
     let tabCargar = document.querySelector('.tab[data-target="cargar"]');
     if(!esAdmin && tabCargar){
         tabCargar.style.display = "none";
@@ -362,15 +353,15 @@ document.addEventListener('DOMContentLoaded', function(){
         }
     }
 
-    // Tab inicial
+
     activarTab(esAdmin ? "firmados" : "pendientes");
 
-    // Click en tabs
+
     tabs.forEach(tab => {
         if(tab) tab.addEventListener("click", function(){ activarTab(tab.dataset.target); });
     });
 
-    // Admin: seleccionar destinatario
+
     if(esAdmin && btnOK && selector){
         btnOK.addEventListener("click", function(){
             const val = selector.value;
@@ -393,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function(){
         destinatario = usuarioPrincipal;
     }
 
-    // No admin: evento firmar
+
     if(botonesFirmar.length){
         botonesFirmar.forEach(b => {
             if(!b) return;
@@ -405,22 +396,22 @@ document.addEventListener('DOMContentLoaded', function(){
                     return;
                 }
 
-                // Guardar en Session el nombre del archivo a firmar
+
                 fetch("guardar_destinatario.asp?file=" + encodeURIComponent(archivoSeleccionado))
                     .then(r => r.text())
                     .then(() => {
-                        // Mostrar pestaña Firmar PDF recién ahora
+                        
                         if(!esAdmin && tabCargar){
                             tabCargar.style.display = "inline-block";
                         }
-                        activarTab('cargar'); // Cambiar automáticamente a esa pestaña
+                        activarTab('cargar'); 
                     })
                     .catch(() => alert("No se pudo preparar la firma"));
             });
         });
     }
 
-    // Drag & Drop PDF
+    
     if(adjuntar){
         adjuntar.addEventListener("dragover", function(e){ e.preventDefault(); adjuntar.style.background = "#eef"; });
         adjuntar.addEventListener("dragleave", function(){ adjuntar.style.background = ""; });
@@ -443,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function(){
         });
     }
 
-    // Guardar PDF
+    
     if(btnGuardar){
         btnGuardar.addEventListener("click", function(){
             if(!archivoPDF){

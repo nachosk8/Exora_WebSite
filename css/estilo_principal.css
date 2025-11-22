@@ -4,7 +4,7 @@
   --bg: #ececec;
 }
 
-/* Reset / base */
+
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -15,20 +15,20 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* Layout */
+
 .pantalla{display:flex; min-height:100vh}
 
-/* Sidebar */
+
 .menu-lateral {
   width:220px;
   background:var(--color--barra--izq);
   color:white;
   position:fixed;
-  top:50px;  /* 🔹 debajo de la barra */
+  top:50px;  
   left:0;
   bottom:0;
   padding:20px 12px;
-  z-index: 500;  /* 🔹 más chico que la barra */
+  z-index: 500;  
 }
 
 
@@ -56,18 +56,18 @@ body{
   transform: translateX(12px);
 }
 
-/* Main content area */
+
 .contenido-principal {
   margin-left:240px;
   padding:22px;
   flex:1;
   overflow-y:auto;
   min-height:100vh;
-  margin-top:50px; /* 🔹 deja espacio para la barra */
+  margin-top:50px; 
 }
 
 
-/* --- CUADROS DE ESTADÍSTICAS --- */
+
 .cuadros-estadisticas{
   display:grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -79,7 +79,7 @@ body{
   text-decoration: none;
 }
 
-/* cada tarjeta */
+
 .tarjeta{
   background:#fff;
   border-radius:10px;
@@ -91,7 +91,7 @@ body{
   justify-content:space-between;
 }
 
-/* izquierda (icono + textos) */
+
 .lado-izquierdo{
   display:flex;
   align-items:center;
@@ -107,7 +107,7 @@ body{
   font-size:22px;
 }
 
-/* textos */
+
 .contenido-tarjeta .titulo-tarjeta{
   font-weight:600;
   font-size:15px;
@@ -120,7 +120,7 @@ body{
   
 }
 
-/* valor a la derecha */
+
 .numero-tarjeta{
   font-size:28px;
   font-weight:700;
@@ -135,7 +135,7 @@ body{
   margin-left:6px;
 }
 
-/* --- POSTS (feed) --- */
+
 .noticia{
   background:#fff;
   border-radius:8px;
@@ -178,40 +178,40 @@ body{
 
 }
 
-/* Efecto hover para las tarjetas */
+
 .tarjeta {
-  transition: all 0.3s ease; /* suaviza el cambio */
-  cursor: pointer; /* cambia el cursor para indicar que es interactivo */
+  transition: all 0.3s ease; 
+  cursor: pointer; 
 }
 
 .tarjeta:hover {
-  box-shadow: 0 6px 20px rgba(13, 0, 255, 0.15); /* sombra más intensa */
-  transform: translateY(-4px); /* efecto de “flotante” */
-  background-color: #f0f8ff; /* ligero cambio de color */
+  box-shadow: 0 6px 20px rgba(13, 0, 255, 0.15); 
+  transform: translateY(-4px); 
+  background-color: #f0f8ff; 
 }
 
-/* Selecciona el botón dentro del div con clase "agregar-anuncio" */
+
 .agregar-anuncio #btnAgregar {
-    background-color: #00124e; /* color normal del botón */
+    background-color: #00124e; 
     color: white;    
-    border: 2px solid white;          /* color del texto */
+    border: 2px solid white;          
     border-radius: 10px;
     height: 40px;
     width: 100%;
     padding: 10px 20px;
     cursor: pointer;
-    transition: background-color 0.3s; /* transición suave */
+    transition: background-color 0.3s; 
 }
 
-/* Cambia el color cuando pasas el mouse */
+
 .agregar-anuncio #btnAgregar:hover {
-    background-color: #0056b3; /* color al hacer hover */
+    background-color: #0056b3; 
 }
 
 .barra-superior {
     width: 100%;
     height: 50px;
-    background-color: #ffffff; /* azul, como tu menú lateral */
+    background-color: #ffffff; 
     color: rgb(0, 0, 0);
     display: flex;
     justify-content: flex-end;
@@ -221,10 +221,9 @@ body{
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1000; /* queda por encima */
+    z-index: 1000; 
 }
 
-/* Contenedor usuario ocupa 25% y lo manda a la derecha */
 .barra-superior .usuario {
     width: 25%;
     text-align: center;
